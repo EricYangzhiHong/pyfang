@@ -18,7 +18,7 @@ if __name__ == '__main__':
 
     # Dicts of useful params for various DBs. 
     # Turn into text files so user can use their own.
-    mysql_params = ['database()', 'user()']
+    mysql_params = ['database()', 'user()', '@@version', '@@datadir', 'from information_schema.columns']
 
     injector = pf_injection.injection("")
     data = injector.injection(page, mysql_params)
