@@ -20,9 +20,8 @@ if __name__ == '__main__':
     # Turn into text files so user can use their own.
     mysql_params = ['database()', 'user()', '@@version', '@@datadir', 'from information_schema.columns']
 
-    injector = pf_injection.injection("")
-    data = injector.injection(page, mysql_params)
-
-    pf_parser.parse(data) 
-
+    inj = pf_injection.injection("")
+    #data = inj.injection(page, mysql_params)
+    #pf_parser.parse(data) 
+    print inj.get_num_columns(page)
 
