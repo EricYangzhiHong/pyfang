@@ -8,7 +8,7 @@ import os, sys, urllib2
 import operator
 import json
     
-class injector:
+class Injector:
     
     # Pass dict of options as param flags
     def __init__(self, flags):
@@ -107,4 +107,5 @@ class injector:
     
         return data
     
+
     #

