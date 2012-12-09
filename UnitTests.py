@@ -1,7 +1,7 @@
 import unittest
 import sys, os
 import pyfang 
-import pf_injection
+import injection
 
 class Test_fang(unittest.TestCase):
     """
@@ -19,7 +19,7 @@ class Test_fang(unittest.TestCase):
         # IP is from my VM, vulnerable page and param already known.
         page = 'http://192.168.83.130/cat.php?id=1' 
         mysql_params = ['database()', 'user()']
-        print pf_injection.injection(page, mysql_params)
+        print injection.injection(page, mysql_params)
 
         print 'Basic injection done.'
 
