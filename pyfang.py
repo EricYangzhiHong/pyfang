@@ -25,6 +25,7 @@ if __name__ == '__main__':
     # Turn into text files so user can use their own.
     mysql_params = ['@@datadir', '@@hostname', '@@version', 'database()', 'user()'] 
 
+    builder = builder.Builder(page, mysql_params)
     inject = injection.Injector("")
     report = reporter.Reporter()
     parse = parser.Parser()
@@ -35,7 +36,6 @@ if __name__ == '__main__':
         4) get table list, print interesting table names
         5) select int. tables, get col # and names
         6) grab selected col. info
-    
     """
 
     # Get number of columns
@@ -45,7 +45,14 @@ if __name__ == '__main__':
     print 'Magic Param','\t', inject.get_visible_param(page)
 
     # Get data
-    data = inject.injection(page, mysql_params) 
+    data = inject.injection(page, mysql_params, ) 
     report.db_info(parse.db_values(data))
+    #print parse.information_schema(data)
+
+    #build = builder.Builder(page, mysql_params)
+    #q = build.schema_union(7,3)['table_name']
+    #print inject.html_diff(inject.get_page(page), inject.get_page(q))
+
+
 
 

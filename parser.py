@@ -3,7 +3,7 @@ import re
 
 def most_common(l):
     """ Takes list of strings.
-        Returns most common string.
+        :returns: most common string.
     """
 
     count = 0
@@ -52,5 +52,16 @@ class Parser:
 #data = Counter(your_list_in_here)
 #data.most_common()   # Returns all unique items and their counts
 #data.most_common(1)
+
+    def information_schema(self, data):
+        """ Takes dict of list of table_names. Parses to get tables of interest.
+            Heuristic currently checks for possibly interesting values like 'user'.
+            Also should exclude common config MySQL tables.
+            :returns: list of parsed tables.
+        """
+        
+        # Currently only queries on table_name
+        return [table for table in data['table_name'] if 'user' in str(table).lower()]
+
 
 
