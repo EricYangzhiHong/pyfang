@@ -16,8 +16,6 @@ def most_common(l):
 
     return answer 
 
-
-
 class Parser:
     """ Parses data gleaned from injections.
 
@@ -44,9 +42,14 @@ class Parser:
                 candidates.append(token)
 
             answers[key] = most_common(candidates)
+        # maybe? #max(number_counts.iteritems(), key = operator.itemgetter(1))[0]
 
         return answers    
 
-
+# another way to get max of list?
+#from collections import Counter
+#data = Counter(your_list_in_here)
+#data.most_common()   # Returns all unique items and their counts
+#data.most_common(1)
 
 

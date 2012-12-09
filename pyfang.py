@@ -41,11 +41,12 @@ if __name__ == '__main__':
         6) grab selected col. info
     """
     
-    num_columns = inject.get_num_columns(page) 
-    report.columns_in_statement(num_columns)
-    data = inject.injection(page, mysql_params) 
-    report.db_info(parse.db_values(data))
-    
-
+    # Get number of columns
+    #num_columns = inject.get_num_columns(page) 
+    #report.columns_in_statement(num_columns)
+    print inject.get_visible_param(page)
+    # Get data
+    #data = inject.injection(page, mysql_params) 
+    #report.db_info(parse.db_values(data))
 
 

