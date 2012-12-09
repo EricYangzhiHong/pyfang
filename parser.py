@@ -61,7 +61,7 @@ class Parser:
         """
         
         # Currently only queries on table_name
-        return [table for table in data['table_name'] if 'user' in str(table).lower()]
+        return [str(table) for table in data['table_name'] if 'user' in str(table).lower()]
 
 
 

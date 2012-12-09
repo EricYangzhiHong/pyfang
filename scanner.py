@@ -5,7 +5,7 @@
 
 """
 from BeautifulSoup import BeautifulSoup    
-import os, sys, urllib2
+import urllib2
 
 class Scanner:
     def __init__(self):

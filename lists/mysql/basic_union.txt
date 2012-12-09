@@ -1,0 +1,5 @@
+@@datadir
+@@hostname
+@@version
+database()
+user()
