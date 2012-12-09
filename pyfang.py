@@ -1,6 +1,5 @@
 #!/usr/bin/python
-"""
-    Driver program for pyfang. Handles user-defined options and calls appropriate modules.
+""" Driver program for pyfang. Handles user-defined options and calls appropriate modules.
 
     OPTIONS to support:
         -f:     \n-delimited text file of parameters to inject (default is mysql_params).
@@ -11,7 +10,7 @@
 """
 
 import os, sys, urllib2
-import builder, injection, parser, reporter
+import builder, injection, scanner, parser, reporter
 import json
 
 if __name__ == '__main__':
@@ -24,14 +23,11 @@ if __name__ == '__main__':
 
     # Dicts of useful params for various DBs. 
     # Turn into text files so user can use their own.
-    mysql_params = ['database()', 'user()', '@@version', '@@datadir', '@@hostname']
+    mysql_params = ['@@datadir', '@@hostname', '@@version', 'database()', 'user()'] 
 
     inject = injection.Injector("")
     report = reporter.Reporter()
     parse = parser.Parser()
-    #print b.build_union_injection(4,2)
-    #print results['database()']
-
 
     """ 0) Find vuln. param
         1) union select to get num cols
@@ -39,14 +35,17 @@ if __name__ == '__main__':
         4) get table list, print interesting table names
         5) select int. tables, get col # and names
         6) grab selected col. info
-    """
     
+    """
+
     # Get number of columns
-    #num_columns = inject.get_num_columns(page) 
-    #report.columns_in_statement(num_columns)
-    print inject.get_visible_param(page)
+    num_columns = inject.get_num_columns(page) 
+    report.columns_in_statement(num_columns)
+
+    print 'Magic Param','\t', inject.get_visible_param(page)
+
     # Get data
-    #data = inject.injection(page, mysql_params) 
-    #report.db_info(parse.db_values(data))
+    data = inject.injection(page, mysql_params) 
+    report.db_info(parse.db_values(data))
 
 

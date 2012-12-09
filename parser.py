@@ -33,6 +33,7 @@ class Parser:
         answers = {}
         for key in data:
             candidates = []
+
             for value in data[key]:
 
                 token = value.replace('"','').replace("'",'')
