@@ -27,6 +27,8 @@ class Parser:
     """
     def __init__(self, store):
         self.store = store
+        self.table_keywords = ['user', 'usr', 'password', 'pass', 'pwd']
+        self.column_keywords = ['user', 'usr', 'password', 'pass', 'pwd']
 
     def db_values(self, data):
         """ Parses HTML for DB info.
@@ -68,17 +70,19 @@ class Parser:
         self.store.table_names(values)
         return values 
 
-    def table(self, data):
-        """ Takes dict of list of table_names. Parses to get tables of interest.
+    def table_for_columns(self, data):
+        """ Takes table_names. Parses to get tables of interest.
                 Heuristic currently checks for possibly interesting values like 'user'.
                 Also should exclude common config MySQL tables.
-            :returns: Dict of list of parsed tables.
+            :returns: List of columns.
         """
+        # in future, should store dict of lists like this for tables other than just 'users'.
         
-        values = {}
-        
-        # Currently only queries on table_name
-        values = [str(table) for table in data['users'] if 'user' in str(table).lower()]
+        values = []
+
+        for column in data['users']:
+            if any(i in str(column).lower() for i in self.column_keywords):
+                values.append(str(column))
 
         self.store.table_names(values)
         return values 

