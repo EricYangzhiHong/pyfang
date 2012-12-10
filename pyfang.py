@@ -10,7 +10,7 @@
 """
 
 import os, sys, urllib2
-import builder, injection, scanner, parser, reporter
+import builder, injector, scanner, parser, reporter
 import json
 
 if __name__ == '__main__':
@@ -26,7 +26,7 @@ if __name__ == '__main__':
 
     # Classes
     build = builder.Builder(page, mysql_params)
-    fang = injection.Injector("")
+    fang = injector.Injector("")
     report = reporter.Reporter()
     parse = parser.Parser()
 
