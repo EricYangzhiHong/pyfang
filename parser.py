@@ -35,7 +35,7 @@ class Parser:
         self.column_keywords = ['user', 'usr', 'password', 'pass', 'pwd']
 
     def html_diff(self, before_injection, after_injection):
-        """ Diffs two lits of HTML.
+        """ Diffs two lists of HTML.
             :before_injection: HTML without SQLI
             :after_injection: HTML with SQLI
             :returns: list of strings representing difference (hopefully captures SQLI info)
