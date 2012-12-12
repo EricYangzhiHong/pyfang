@@ -33,14 +33,20 @@ class Parser:
         self.store = store
         self.table_keywords = ['user', 'usr', 'password', 'pass', 'pwd']
         self.column_keywords = ['user', 'usr', 'password', 'pass', 'pwd']
+        self.exclude = set(open('./lists/mysql/excluded_tables').readlines())
 
-    def html_diff(self, before_injection, after_injection):
+    def html_diff(self, pre, post):
         """ Diffs two lists of HTML.
             :before_injection: HTML without SQLI
             :after_injection: HTML with SQLI
             :returns: list of strings representing difference (hopefully captures SQLI info)
         """
-        return list(set(after_injection) - set(before_injection))
+        #return list(set(post) - set(pre))
+
+        for word in pre:
+            if word in post:
+                post.remove(word)
+        return post
 
     def params(self, data):
         """ Parses HTML for DB info.
@@ -79,6 +85,9 @@ class Parser:
                 if any(i in str(table).lower() for i in self.column_keywords):
                     values.append(str(table))
 
+        # Exclude common config tables by default
+        values = list(set(values) - self.exclude)
+
         self.store.tables(values)
         return values 
 
@@ -105,8 +114,4 @@ class Parser:
         """
 
         return 0
-
-
-
-
 
