@@ -17,10 +17,17 @@ class Reporter:
             print self.delimiter, i
 
     def columns(self, data):
+        """
+            :data: Dict of lists. Table->columns.
+        """
         # Will need to be changed once funct is extended to work w/ multiple tables
         # data will probly be a Dict of Lists
-        print self.delimiter, 'Table:', 'users'
-        print self.delimiter, 'Columns:'
 
-        for i in data:
-            print self.delimiter * 2, i
+        for table in data:
+            print self.delimiter, 'Table:', table
+            print self.delimiter, 'Columns:'
+            for column in data[table]:
+                print self.delimiter * 2, column
+
+
+

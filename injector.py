@@ -1,18 +1,19 @@
 #!/usr/bin/python
-""" Used for basic union-based SQL injection.
-
-"""
 import os, sys
 import builder, parser, scanner
 import re
 from collections import Counter
     
 class Injector:
+    """ Used for basic union-based SQL injection.
+
+    """
     
     # Pass dict of options as param flags
     def __init__(self, page, flags):
         """ Receives strings from builder to inject and passes off output to parser.
-            :flags:
+            :page:  Web page to perform injections against. 
+            :flags: Dict of strings. Keys are flags, values are params.
         """
         self.page = page
         self.flags = flags 
@@ -27,7 +28,7 @@ class Injector:
     
     def get_num_columns(self):
         """ Try unions until no SQL errors returned.
-            :returns: Int, number of columns in vulnerable statement.
+            :returns:   Int. Number of columns in vulnerable statement.
         """
         count = 1
     
@@ -56,8 +57,7 @@ class Injector:
     
     def get_visible_param(self):
         """ Get most common number appearing in HTML, this is where to inject variables.
-            :page: List of HTML lines.
-            :returns: Most commonly seen number in page, hopefully the injectable param.
+            :returns:   String. Most commonly seen number in page, hopefully the injectable param.
         """
         
         # Make query string
@@ -73,7 +73,8 @@ class Injector:
     
     def injection(self, queries):
         """ Takes page to fuzz for injections and params to check for.
-            :returns: dict of lists, keys are injected strings, values are results.
+            :queries: List??? need to check it is always a list.
+            :returns:   Dict of lists. Keys are injected strings, values are results.
         """
         default_page = self.scan.page(self.page)
         data = {}

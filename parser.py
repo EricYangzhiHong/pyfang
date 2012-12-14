@@ -28,7 +28,7 @@ class Parser:
 
     def __init__(self, store):
         """ Create Lists of keywords for tables and columns.
-            :store: Store object, holds dicts of DB information and tables.
+            :store:     Store object, holds dicts of DB information and tables.
         """
         self.store = store
         self.table_keywords = ['user', 'usr', 'password', 'pass', 'pwd']
@@ -37,21 +37,23 @@ class Parser:
 
     def html_diff(self, pre, post):
         """ Diffs two lists of HTML.
-            :before_injection: HTML without SQLI
-            :after_injection: HTML with SQLI
-            :returns: list of strings representing difference (hopefully captures SQLI info)
+            :pre:       HTML without SQLI
+            :post:      HTML with SQLI
+            :returns:   List of strings. Difference between two URL's HTML.
         """
-        #return list(set(post) - set(pre))
+        return list(set(post) - set(pre))
 
+        """
         for word in pre:
             if word in post:
                 post.remove(word)
         return post
+        """
 
     def params(self, data):
         """ Parses HTML for DB info.
-            :data: Dict of lists.
-            :returns: Dict of parsed lists.
+            :data:      Dict of lists.
+            :returns:   Dict of lists.
         """
 
         values = {}
@@ -75,14 +77,14 @@ class Parser:
     def tables(self, data):
         """ Gets tables of interest from raw data.
                 Heuristic currently checks for possibly interesting values like 'user'.
-            :data: Dict of Lists, currently only Dict entry is 'table_name'
-            :returns: List of tables with interesting names.
+            :data:      Dict of Lists, currently only Dict entry is 'table_name'
+            :returns:   List of strings. Tables with interesting names.
         """
         
         values = []
         for datum in data:
             for table in data[datum]:
-                if any(i in str(table).lower() for i in self.column_keywords):
+                if any(i in str(table).lower() for i in self.table_keywords):
                     values.append(str(table))
 
         # Exclude common config tables by default
@@ -91,21 +93,25 @@ class Parser:
         self.store.tables(values)
         return values 
 
-    def columns(self, data):
-        """ Takes table_names. Parses to get tables of interest.
+    def columns(self, tables):
+        """ Finds columns of interest.
                 Heuristic currently checks for possibly interesting values like 'user'.
                 Also should exclude common config MySQL tables.
-            :returns: List of columns.
+            :data:      Dict of lists. Table->Columns
+            :returns:   List of strings. Columns. 
         """
+        values = {}
 
-        columns = []
+        for table in tables:
+            columns = tables[table]
+            values[table] = []
 
-        for column in data['users']:
-            if any(i in str(column).lower() for i in self.column_keywords):
-                columns.append(str(column))
+            for column in columns:
+                if any(i in str(column).lower() for i in self.column_keywords):
+                    values[table].append((str(column)))
 
         self.store.columns(columns)
-        return columns
+        return values
 
     def rows(self, data):
         """ Takes column data for each column for a table
