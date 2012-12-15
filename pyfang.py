@@ -43,7 +43,8 @@ def obfuscate_subquery(obfuscator, obfuscation, subquery):
 if __name__ == '__main__':
 
     if len(sys.argv) == 1:
-        print 'Help?'
+        print 'Currently pyfang supports:'
+        print 'python pyfang [ip]/[page]?param'
         sys.exit(0)
 
     page = sys.argv[1]
