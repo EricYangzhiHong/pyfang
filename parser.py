@@ -36,12 +36,12 @@ class Parser:
         self.exclude = set(open('./lists/mysql/excluded_tables').readlines())
 
     def html_diff(self, pre, post):
-        """ Diffs two lists of HTML.
+        """ Diffs two strings of HTML by splitting on whitespace.
             :pre:       HTML without SQLI
             :post:      HTML with SQLI
             :returns:   List of strings. Difference between two URL's HTML.
         """
-        return list(set(post) - set(pre))
+        return list(set(post.split()) - set(pre.split()))
 
         """
         for word in pre:

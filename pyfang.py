@@ -15,6 +15,27 @@ import md5
 import pprint
 import json
 
+def startup(page, param_string):
+    """ Handles startup of script, flags, etc.
+        :page:          String. URL before querystring.
+        :param_string:  String. URL querystring.
+        :returns:       String. Page ready for sqli manipulation.
+    """
+    params = {i.split('=')[0]:i.split('=')[1]  for i in param_string.split('&')}
+
+    # Get SQLi vulnerable param.
+    sqli_vulnerable_param = sys.argv[2][len('sqli='):]
+
+    # Construct basic page format for sqli
+    sqli = page + '?' 
+    if len(params) > 1:
+        sqli += "&".join([p + '=' + params[p] for p in params if p != sqli_vulnerable_param])
+        sqli += '&' + sqli_vulnerable_param + '=' + params[sqli_vulnerable_param]
+    else: # only one param
+        sqli += sqli_vulnerable_param + '=' + params[sqli_vulnerable_param]
+
+    return sqli 
+
 def test_html_diff():
     """ Debugging function """
 
@@ -47,10 +68,12 @@ def test_obfuscation():
     hexencoded += obfuscate_subquery(obfuscate, 'hex', '\'users\'') + ')'
     print hexencoded
 
-def test_basic_data(page):
+def test_sqli_info(page):
     
-    # Get column data for union statement
     fang = injector.Injector(page, "")
+    report = reporter.Reporter()
+
+    # Get column data for union statement
     print '\n### Basic Page Structure ###'
     num_columns = fang.get_num_columns() 
     report.columns_in_statement(num_columns)
@@ -90,26 +113,41 @@ if __name__ == '__main__':
         print 'python pyfang [ip]/[page]?param'
         sys.exit(0)
 
-    page = sys.argv[1]
+    #page = sys.argv[1]
+    # Format is page="page"
+    # Get page and dict of param => value
+    url = sys.argv[1][len('page='):] # take off page=" and ", weird, should be changed later.
+    page_id, param_string = tuple(url.split('?'))
 
+    page = startup(page_id, param_string)
+    print page
 
     # whitespace-delimited file
     mysql_params = open('./lists/mysql/basic_union.txt').read().split()
     #config = open('./configs/mysql/php/query_configs.txt').readlines()
 
     # Instantiate classes used
-    scan = scanner.Scanner()
     build = builder.Builder(page, mysql_params)
     store = datastore.Store()
+    scan = scanner.Scanner()
     fang = injector.Injector(page, "")
     report = reporter.Reporter()
     parse = parser.Parser(store)
     obfuscate = obfuscator.Obfuscator()
 
+
+
+    #test_sqli_info(page)
+    #num_columns = fang.get_num_columns() 
+    #magic_num = int(fang.get_visible_param())
+
+
+    """
     x = build.comparative_precomputation()
     my_dict = fang.pre_comp_injection(x)
 
     store.create_lookup(my_dict)
     print store.lookup_table
+    """
 
 

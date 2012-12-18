@@ -3,6 +3,10 @@ import md5
 
 class Store:
     def __init__(self):
+
+        # Page -> HTML
+        self.pages = {}
+
         self.database_info = {}
         self.database = {}
 

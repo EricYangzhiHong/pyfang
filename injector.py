@@ -34,7 +34,6 @@ class Injector:
         count = 1
     
         original_page = self.scan.page(self.page)
-        print original_page
         ### Using UNION SELECT appending 1,2,... ###
         union = self.page + self.build.union_string + self.build.delimiter + '1'
 
@@ -83,7 +82,6 @@ class Injector:
         
         for query in queries:
             data[query] = self.parse.html_diff(default_page, self.scan.page(queries[query]))
-            print query
 
         return data
 
