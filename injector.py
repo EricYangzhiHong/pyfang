@@ -15,6 +15,8 @@ class Injector:
             :page:  Web page to perform injections against. 
             :flags: Dict of strings. Keys are flags, values are params.
         """
+
+        page_and_params = page.split('?')
         self.page = page
         self.flags = flags 
         self.offset = 0 # can be changed to say, self.offset, if 1,2,3,4... found on page a lot
@@ -25,7 +27,6 @@ class Injector:
         self.parse = parser.Parser('') #hackish
         self.scan = scanner.Scanner()
     
-    
     def get_num_columns(self):
         """ Try unions until no SQL errors returned.
             :returns:   Int. Number of columns in vulnerable statement.
@@ -33,6 +34,7 @@ class Injector:
         count = 1
     
         original_page = self.scan.page(self.page)
+        print original_page
         ### Using UNION SELECT appending 1,2,... ###
         union = self.page + self.build.union_string + self.build.delimiter + '1'
 
@@ -81,7 +83,20 @@ class Injector:
         
         for query in queries:
             data[query] = self.parse.html_diff(default_page, self.scan.page(queries[query]))
+            print query
 
         return data
+
+    def pre_comp_injection(self, queries):
+        """
+        data = {}
+        for query in queries:
+            data[query] = self.scan.raw_html(queries[query])
+        return data
+        """
+
+        return {query: self.scan.raw_html(queries[query]) for query in queries}
+        
+
     
     #

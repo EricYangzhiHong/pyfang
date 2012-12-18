@@ -5,6 +5,7 @@ class Builder:
         i)      Error-based
         ii)     Union-based
         iii)    Blind 
+            a)     Comparative Pre-Computation
     """
 
     def __init__(self, page, mysql_params):
@@ -109,6 +110,17 @@ class Builder:
 
     def blind():
         return 0
+
+    def comparative_precomputation(self):
+        """ Creates a dictionary to pre-compute all possible values for some parameter.
+            These values are hashed and compared later to perform more efficient blind sqli.
+            :returns:   Dict of strings.
+        """
+
+        lookup = {i: self.page.split('=')[0] + '=' + str(i) for i in xrange(0,255)}
+        lookup['null'] = self.null_url
+
+        return lookup
 
 
 

@@ -28,6 +28,15 @@ class Scanner:
     
         return message.split()
 
+    def raw_html(self, page):
+        try:
+            html = urllib2.urlopen(page).read()
+        except urllib2.HTTPError as e:
+            print e
+    
+        return html
+        
+
     def params(self):
         return 0
 
