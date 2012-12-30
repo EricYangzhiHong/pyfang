@@ -22,7 +22,6 @@ class Scanner:
         if 'http://' not in page:
             page = 'http://' + page
     
-        print page
         # Memoize for efficiency and stealth.
         if page in self.pages:
             return self.pages[page]
