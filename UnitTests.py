@@ -50,6 +50,25 @@ class Test_fang(unittest.TestCase):
 
         print 'Test done.\n'
 
+    def test_union_queries(self):
+        print '3rd test.'
+        print 'Injecting union queries for MySQL...'
+
+        mysql_params = open('./lists/mysql/basic_union.txt').read().split()
+
+        query_params = mysql_params
+
+        # PenTesterLab
+        page = self.PTL_page
+        num_cols = pyfang.num_columns(page, False)
+        visible_num = int(pyfang.visible_nums(page, num_cols, False)[0])
+        pyfang.union_queries(page, query_params, num_cols, visible_num, True)
+
+        # PenTesterLab
+        page = self.PTL_page
+        num_cols = pyfang.num_columns(page, False)
+        visible_num = int(pyfang.visible_nums(page, num_cols, False)[0])
+        pyfang.union_queries(page, query_params, num_cols, visible_num, True)
 
     """
     # Tests using VMWare basic SQLi from pentesterlabs

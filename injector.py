@@ -55,10 +55,10 @@ class Injector:
     
         return count
     
+    """
     def get_visible_param(self):
-        """ Get most common number appearing in HTML, this is where to inject variables.
+         Get most common number appearing in HTML, this is where to inject variables.
             :returns:   String. Most commonly seen number in page, hopefully the injectable param.
-        """
         
         # Make query string
         union_urls = self.build.union_nums(self.get_num_columns())
@@ -69,6 +69,7 @@ class Injector:
         #nums.remove('')
 
         return Counter(nums).most_common(1)[0][0]
+    """
         
     
     def injection(self, queries):
