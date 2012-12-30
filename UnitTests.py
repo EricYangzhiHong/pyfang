@@ -38,17 +38,15 @@ class Test_fang(unittest.TestCase):
 
         # CTF6 from LAMPSec
         page = self.CTF6_page
-        actual_num_cols = 7
-        num_found_cols = injector.Injector(page, "").get_num_columns()
-        print num_found_cols, 'found. Should have found', actual_num_cols
-        self.assertTrue(num_found_cols == actual_num_cols)
+        real_num_cols = 7
+        num_cols_found = pyfang.num_columns(injector.Injector(page, ''), True)
+        self.assertTrue(num_cols_found == real_num_cols)
 
         # PenTesterLab
         page = self.PTL_page
-        actual_num_cols = 4
-        num_found_cols = injector.Injector(page, "").get_num_columns()
-        print num_found_cols, 'found. Should have found', actual_num_cols
-        self.assertTrue(num_found_cols == actual_num_cols)
+        real_num_cols = 4
+        num_cols_found = pyfang.num_columns(injector.Injector(page, ''), True)
+        self.assertTrue(num_cols_found == real_num_cols)
 
         print 'Test done.\n'
 
@@ -57,6 +55,15 @@ class Test_fang(unittest.TestCase):
 
         # CTF6 from LAMPSec
         page = self.CTF6_page
+        magic_num_found = pyfang.magic_num(injector.Injector(page, ''), True)
+        real_magic_num = 7
+        self.assertTrue(magic_num_found == real_magic_num)
+
+        # PenTesterLab
+        page = self.PTL_page
+        real_magic_num = 2
+        magic_num_found = pyfang.magic_num(injector.Injector(page, ''), True)
+        self.assertTrue(magic_num_found == real_magic_num)
 
     """
     # Tests using VMWare basic SQLi from pentesterlabs

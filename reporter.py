@@ -8,6 +8,9 @@ class Reporter:
     def columns_in_statement(self, num_columns):
         print self.delimiter, 'Columns', self.delimiter, num_columns
 
+    def magic_number(self, magic_num):
+        print self.delimiter, 'Magic Number', self.delimiter, magic_num 
+
     def db_info(self, data):
         for key in data:
             print self.delimiter, key, self.delimiter, data[key]
