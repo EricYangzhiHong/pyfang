@@ -42,13 +42,22 @@ class Parser:
             :returns:   List of strings. Difference between two URL's HTML.
         """
         return list(set(post.split()) - set(pre.split()))
-
         """
+        pre = pre.split()
+        post = post.split()
+
         for word in pre:
             if word in post:
                 post.remove(word)
         return post
         """
+
+    def get_visible_nums(self, diff):
+        """ Takes diff (probably from self.html_diff) of two HTML pages. Finds ints.
+            :diff:      List of (unicode?) strings.
+            :returns:   List of ints found in diff.
+        """
+        return [i for i in diff if i.isdigit()]
 
     def params(self, data):
         """ Parses HTML for DB info.

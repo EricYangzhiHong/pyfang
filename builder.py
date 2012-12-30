@@ -36,10 +36,11 @@ class Builder:
     def error():
         return 0
 
-    def union(self, num_cols, magic_col):
+    def union(self, num_cols, magic_col, i_type):
         """ :num_cols:  Number of columns for UNION statement.
             :magic_col: Column number that is most visible, and therefore used for injection parameter.
             :returns:   Dict of strings. All basic union-based injections.
+            :i_type:    Injection type. String or int?
         """
         injections = {}
         union_urls = self.union_nums(num_cols) 
