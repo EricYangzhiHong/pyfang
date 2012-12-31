@@ -58,8 +58,8 @@ class Test_fang(unittest.TestCase):
 
         query_params = mysql_params
 
-        # PenTesterLab
-        page = self.PTL_page
+        # CTF6 from LAMPSec
+        page = self.CTF6_page
         num_cols = pyfang.num_columns(page, False)
         visible_num = int(pyfang.visible_nums(page, num_cols, False)[0])
         pyfang.union_queries(page, query_params, num_cols, visible_num, True)
@@ -69,6 +69,7 @@ class Test_fang(unittest.TestCase):
         num_cols = pyfang.num_columns(page, False)
         visible_num = int(pyfang.visible_nums(page, num_cols, False)[0])
         pyfang.union_queries(page, query_params, num_cols, visible_num, True)
+
 
     """
     # Tests using VMWare basic SQLi from pentesterlabs

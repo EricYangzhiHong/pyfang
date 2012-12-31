@@ -75,7 +75,8 @@ class Injector:
     def injection(self, queries):
         """ Takes page to fuzz for injections and params to check for.
             :queries: List??? need to check it is always a list.
-            :returns:   Dict of lists. Keys are injected strings, values are results.
+            :returns:   List if queries has only one query.
+                        Dict of lists otherwise. Keys are injected strings, values are results.
         """
         default_page = self.scan.page(self.page)
         data = {}
@@ -83,7 +84,11 @@ class Injector:
         for query in queries:
             data[query] = self.parse.html_diff(default_page, self.scan.page(queries[query]))
 
-        return data
+        # Return list if only one query, else dict of query->results
+        if len(queries) == 1:
+            return data[queries.iterkeys().next()]
+        else:
+            return data
 
     def pre_comp_injection(self, queries):
         """

