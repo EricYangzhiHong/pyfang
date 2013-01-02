@@ -122,6 +122,9 @@ class Parser:
             :data: Dict of Lists
             :returns:
         """
+        
+        if len(rows) == 0:
+            return []
 
         return rows
 
